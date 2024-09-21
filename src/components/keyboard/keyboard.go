@@ -1,14 +1,16 @@
 package keyboard
 
 import (
+	"github.com/mymmrac/telego"
 	tu "github.com/mymmrac/telego/telegoutil"
 )
 
-func CreateKeyboard() tu.ReplyKeyboardMarkup {
+func CreateKeyboard() *telego.ReplyKeyboardMarkup {
 	return tu.Keyboard(
 		tu.KeyboardRow( // Row 1
 			tu.KeyboardButton("Button"),
-			tu.KeyboardButton("Poll Regular").WithRequestPoll(tu.PollTypeRegular()),
+			tu.KeyboardButton("Poll Regular").
+				WithRequestPoll(tu.PollTypeRegular()),
 		),
 		tu.KeyboardRow( // Row 2
 			tu.KeyboardButton("Contact").WithRequestContact(),
