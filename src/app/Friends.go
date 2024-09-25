@@ -1,9 +1,7 @@
 package main
 
 import (
-	"Friends/src/handlers/handleSelectCourse"
-	"Friends/src/handlers/handleSelectFaculty"
-	"Friends/src/handlers/handleStart"
+	"Friends/src/handlers"
 	"fmt"
 	"github.com/joho/godotenv"
 	"github.com/mymmrac/telego"
@@ -56,17 +54,17 @@ func main() {
 	defer bot.StopLongPolling()
 
 	bh.Handle(
-		handleCourse.HandleSelectCourse,
+		handle.HandleSelectCourse,
 		th.CommandEqual("curs"),
 	)
 
 	bh.Handle(
-		handleFaculty.HandleSelectFaculty,
+		handle.HandleSelectFaculty,
 		th.CommandEqual("fac"),
 	)
 
 	bh.Handle(
-		handleStart.HandleStartCommand,
+		handle.HandleStartCommand,
 		th.CommandEqual("start"),
 	)
 

@@ -1,4 +1,4 @@
-package handleFaculty
+package handle
 
 import (
 	"Friends/src/components/keyboards"
