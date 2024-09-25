@@ -9,11 +9,11 @@ import (
 )
 
 
-func HandleSelectCourse(bot *telego.Bot, update telego.Update) {
+func HandleSelectCourse(bot *telego.Bot, msg telego.Message) {
 	bot.EditMessageReplyMarkup(nil);
 	keyboard := keyboard.CreateKeyboardCourse()
 	_, _ = bot.SendMessage(tu.Message(
-		tu.ID(update.Message.Chat.ID),
+		msg.Chat.ChatID(),
 		fmt.Sprintf("Выберите курс"),
 	).WithReplyMarkup(keyboard))
 }

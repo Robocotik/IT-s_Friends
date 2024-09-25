@@ -1,3 +1,3 @@
 package messages
 
-var Start = "/start"
+var Start = "Погнали"

@@ -2,18 +2,17 @@ package handle
 
 import (
 	"Friends/src/components/keyboards"
-	// "Friends/src/messages"
 	"github.com/mymmrac/telego"
 	tu "github.com/mymmrac/telego/telegoutil"
 	"fmt"
 )
 
 
-func HandleSelectFaculty(bot *telego.Bot, update telego.Update) {
+func HandleSelectFaculty(bot *telego.Bot, msg telego.Message) {
 	bot.EditMessageReplyMarkup(nil);
 	keyboard := keyboard.CreateKeyboardFaculty()
 	_, _ = bot.SendMessage(tu.Message(
-		tu.ID(update.Message.Chat.ID),
+		msg.Chat.ChatID(),
 		fmt.Sprintf("Выберите факультет"),
 	).WithReplyMarkup(keyboard))
 }
