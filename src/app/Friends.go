@@ -1,15 +1,16 @@
 package main
 
 import (
+	"Friends/src/handlers/handleSelectCourse"
+	"Friends/src/handlers/handleSelectFaculty"
 	"Friends/src/handlers/handleStart"
 	"fmt"
-	"log"
-	"os"
-
 	"github.com/joho/godotenv"
 	"github.com/mymmrac/telego"
 	th "github.com/mymmrac/telego/telegohandler"
 	tu "github.com/mymmrac/telego/telegoutil"
+	"log"
+	"os"
 )
 
 func init() {
@@ -17,6 +18,24 @@ func init() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
+}
+
+type State uint
+
+const (
+	StateDefault State = iota
+	StateAskCourse
+	StateAskFaculty
+	StateAskCathedra
+	StateConfirm
+	StateSearch
+)
+
+type User struct {
+	State    State
+	Faculty  string
+	Course   uint
+	Cathedra string
 }
 
 func main() {
@@ -33,6 +52,19 @@ func main() {
 
 	fmt.Printf("Bot User: %+v\n", botUser)
 
+	defer bh.Stop()
+	defer bot.StopLongPolling()
+
+	bh.Handle(
+		handleCourse.HandleSelectCourse,
+		th.CommandEqual("curs"),
+	)
+
+	bh.Handle(
+		handleFaculty.HandleSelectFaculty,
+		th.CommandEqual("fac"),
+	)
+
 	bh.Handle(
 		handleStart.HandleStartCommand,
 		th.CommandEqual("start"),
@@ -46,7 +78,5 @@ func main() {
 		))
 	}, th.AnyCommand())
 
-	// Start handling updates
 	bh.Start()
-
 }
