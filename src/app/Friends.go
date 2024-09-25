@@ -3,7 +3,7 @@ package main
 import (
 	"Friends/src/assets"
 	"Friends/src/handlers"
-	"Friends/src/messages"
+	// "Friends/src/messages"
 	"Friends/src/utils"
 	"fmt"
 	"log"
@@ -68,10 +68,9 @@ func main() {
 
 		case StateAskCourse:
 			handle.HandleSelectCourse(bot, msg)
-			if msg.Text != messages.Start {
-				user.Faculty = utils.ParseString(bot, msg, "курс", assets.Fakultets[:])
-				user.State = StateAskFaculty
-			}
+			user.Faculty = utils.ParseString(bot, msg, "курс", assets.Fakultets[:])
+			user.State = StateAskFaculty
+
 		case StateAskFaculty:
 			handle.HandleSelectFaculty(bot, msg)
 			user.Course = utils.ParseString(bot, msg, "факультет", assets.Courses[:])

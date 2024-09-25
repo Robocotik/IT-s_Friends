@@ -9,7 +9,6 @@ import (
 )
 
 func HandleStart(bot *telego.Bot, msg telego.Message) {
-	bot.EditMessageReplyMarkup(nil);
 	keyboard := keyboard.CreateKeyboardStart()
 	_, _ = bot.SendMessage(tu.Message(
 		msg.Chat.ChatID(),

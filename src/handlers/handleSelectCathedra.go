@@ -9,7 +9,6 @@ import (
 
 
 func HandleSelectCathedra(bot *telego.Bot, msg telego.Message) {
-	bot.EditMessageReplyMarkup(nil);
 	keyboard := keyboard.CreateKeyboardCathedra()
 	_, _ = bot.SendMessage(tu.Message(
 		msg.Chat.ChatID(),

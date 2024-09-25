@@ -28,5 +28,5 @@ func CreateKeyboardCathedra() *telego.ReplyKeyboardMarkup {
 
 	return tu.Keyboard(
 		items_rows...,
-	).WithResizeKeyboard().WithInputFieldPlaceholder("Выберите кафедру")
+	).WithResizeKeyboard().WithInputFieldPlaceholder("Выберите кафедру").WithOneTimeKeyboard()
 }

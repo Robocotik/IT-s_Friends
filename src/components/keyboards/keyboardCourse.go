@@ -21,5 +21,5 @@ func CreateKeyboardCourse() *telego.ReplyKeyboardMarkup {
 			tu.KeyboardButton(emoji.Courses[4]+assets.Courses[4]),
 			tu.KeyboardButton(emoji.Courses[5]+assets.Courses[5]),
 		),
-	).WithResizeKeyboard().WithInputFieldPlaceholder("Выберите курс")
+	).WithResizeKeyboard().WithInputFieldPlaceholder("Выберите курс").WithOneTimeKeyboard()
 }
