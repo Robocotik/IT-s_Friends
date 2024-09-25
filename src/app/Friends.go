@@ -1,14 +1,18 @@
 package main
 
 import (
+	"Friends/src/assets"
 	"Friends/src/handlers"
+	"Friends/src/messages"
+	"Friends/src/utils"
 	"fmt"
+	"log"
+	"os"
+
 	"github.com/joho/godotenv"
 	"github.com/mymmrac/telego"
 	th "github.com/mymmrac/telego/telegohandler"
 	tu "github.com/mymmrac/telego/telegoutil"
-	"log"
-	"os"
 )
 
 func init() {
@@ -42,6 +46,7 @@ func main() {
 	botUser, _ := bot.GetMe()
 	updates, _ := bot.UpdatesViaLongPolling(nil)
 	bh, _ := th.NewBotHandler(bot, updates)
+
 	var user User
 
 	if err != nil {
@@ -55,42 +60,26 @@ func main() {
 	defer bot.StopLongPolling()
 
 	bh.HandleMessage(func(bot *telego.Bot, msg telego.Message) {
-
 		switch user.State {
+
 		case StateDefault:
 			handle.HandleStart(bot, msg)
 			user.State = StateAskCourse
-		case StateAskCourse:
-			// Specify name (no validation)
-			user.Faculty = msg.Text
-			handle.HandleSelectCourse(bot, msg)
-			user.State = StateAskFaculty
-		case StateAskFaculty:
-			// Specify age (validate that its positive number)
-			// if err != nil || age == 0 {
-			// 	_, _ = bot.SendMessage(tu.Message(
-			// 		msg.Chat.ChatID(),
-			// 		fmt.Sprintf("Invalid age, please try again"),
-			// 	))
-			// No state change
-			// } else {
-			user.Course = msg.Text
-			handle.HandleSelectFaculty(bot, msg)
-			user.State = StateAskCathedra
-			// }
-		case StateAskCathedra:
-			// Specify email (validate that its valid email address)
-			// var addr *mail.Address
-			// addr, err = mail.ParseAddress(msg.Text)
-			// if err != nil {
-			// 	_, _ = bot.SendMessage(tu.Message(
-			// 		msg.Chat.ChatID(),
-			// 		fmt.Sprintf("Invalid email, please try again"),
-			// 	))
-			// No state change
 
-			user.Faculty = msg.Text
+		case StateAskCourse:
+			handle.HandleSelectCourse(bot, msg)
+			if msg.Text != messages.Start {
+				user.Faculty = utils.ParseString(bot, msg, "курс", assets.Fakultets[:])
+				user.State = StateAskFaculty
+			}
+		case StateAskFaculty:
+			handle.HandleSelectFaculty(bot, msg)
+			user.Course = utils.ParseString(bot, msg, "факультет", assets.Courses[:])
+			user.State = StateAskCathedra
+
+		case StateAskCathedra:
 			handle.HandleSelectCathedra(bot, msg)
+			user.Cathedra = utils.ParseString(bot, msg, "кафедра", assets.Cathedras[:])
 			user.State = StateConfirm
 
 		case StateConfirm:
@@ -120,34 +109,5 @@ func main() {
 			panic("unknown state")
 		}
 	})
-
-	// bh.Handle(
-	// 	handle.HandleSelectCourse,
-	// 	th.CommandEqual("curs"),
-	// )
-
-	// bh.Handle(
-	// 	handle.HandleSelectFaculty,
-	// 	th.CommandEqual("fac"),
-	// )
-
-	// bh.Handle(
-	// 	handle.HandleSelectCathedra,
-	// 	th.CommandEqual("cathedra"),
-	// )
-
-	// bh.Handle(
-	// 	handle.HandleStartCommand,
-	// 	th.CommandEqual("start"),
-	// )
-
-	// bh.Handle(func(bot *telego.Bot, update telego.Update) {
-	// 	// Send message
-	// 	_, _ = bot.SendMessage(tu.Message(
-	// 		tu.ID(update.Message.Chat.ID),
-	// 		"Unknown command, use /start",
-	// 	))
-	// }, th.AnyCommand())
-
 	bh.Start()
 }
