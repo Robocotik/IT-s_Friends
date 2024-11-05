@@ -11,5 +11,5 @@ func CreateKeyboardStart() *telego.ReplyKeyboardMarkup {
 		tu.KeyboardRow(
 			tu.KeyboardButton(messages.Start),
 		),
-	).WithResizeKeyboard().WithInputFieldPlaceholder("/go").WithOneTimeKeyboard()
+	).WithResizeKeyboard().WithInputFieldPlaceholder("/start").WithOneTimeKeyboard()
 }

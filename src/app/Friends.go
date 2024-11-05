@@ -3,7 +3,6 @@ package main
 import (
 	"Friends/src/assets"
 	"Friends/src/handlers"
-	// "Friends/src/messages"
 	"Friends/src/utils"
 	"fmt"
 	"log"
@@ -25,7 +24,8 @@ func init() {
 type State uint
 
 const (
-	StateDefault State = iota
+	StateStart State = iota
+	StateDefault
 	StateAskCourse
 	StateAskFaculty
 	StateAskCathedra
@@ -62,26 +62,36 @@ func main() {
 	bh.HandleMessage(func(bot *telego.Bot, msg telego.Message) {
 		switch user.State {
 
-		case StateDefault:
+		case StateStart:
+
+			msg.Text = ""
 			handle.HandleStart(bot, msg)
+			user.State = StateDefault
+			msg.Text = ""
+
+		case StateDefault:
+
+			user.Course = utils.ParseString(bot, msg, "Погнали", []string{"Погнали"})
+			handle.HandleSelectCourse(bot, msg)
 			user.State = StateAskCourse
 
 		case StateAskCourse:
-			handle.HandleSelectCourse(bot, msg)
-			user.Faculty = utils.ParseString(bot, msg, "курс", assets.Fakultets[:])
+			
+			user.Course = utils.ParseString(bot, msg, "курс", assets.Courses[:])
+			handle.HandleSelectFaculty(bot, msg)
 			user.State = StateAskFaculty
 
 		case StateAskFaculty:
-			handle.HandleSelectFaculty(bot, msg)
-			user.Course = utils.ParseString(bot, msg, "факультет", assets.Courses[:])
+
+			user.Faculty = utils.ParseString(bot, msg, "факультет", assets.Fakultets[:])
+			handle.HandleSelectCathedra(bot, msg)
 			user.State = StateAskCathedra
 
 		case StateAskCathedra:
-			handle.HandleSelectCathedra(bot, msg)
-			user.Cathedra = utils.ParseString(bot, msg, "кафедра", assets.Cathedras[:])
-			user.State = StateConfirm
 
-		case StateConfirm:
+			user.Cathedra = utils.ParseString(bot, msg, "кафедра", assets.Cathedras[:])
+			// handle.HandleSelectCathedra(bot, msg)
+			user.State = StateConfirm
 			_, _ = bot.SendMessage(tu.Message(
 				msg.Chat.ChatID(),
 				fmt.Sprintf(
@@ -89,12 +99,14 @@ func main() {
 					user.Course, user.Faculty, user.Cathedra,
 				),
 			))
+		case StateConfirm:
+
 			if msg.Text == "Y" {
 				_, _ = bot.SendMessage(tu.Message(
 					msg.Chat.ChatID(),
 					fmt.Sprintf("Thanks for your data!"),
 				))
-				user.State = StateDefault
+				user.State = StateStart
 				// Do some logic
 			} else {
 				_, _ = bot.SendMessage(tu.Message(
@@ -102,9 +114,13 @@ func main() {
 					fmt.Sprintf("Ok, let's start again"),
 				))
 
-				user.State = StateDefault
+				user.State = StateStart
 			}
 		default:
+			_, _ = bot.SendMessage(tu.Message(
+				msg.Chat.ChatID(),
+				fmt.Sprintf("Неизвестная команда"),
+			))
 			panic("unknown state")
 		}
 	})
