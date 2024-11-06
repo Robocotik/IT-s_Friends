@@ -24,7 +24,7 @@ func DoSwitch(user *structures.User, bot *telego.Bot, msg telego.Message) {
 	switch user.State {
 
 	case StateStart:
-
+		SearchGroupUID()
 		msg.Text = ""
 		handle.HandleStart(bot, msg)
 		user.State = StateDefault
@@ -66,7 +66,7 @@ func DoSwitch(user *structures.User, bot *telego.Bot, msg telego.Message) {
 				msg.Chat.ChatID(),
 				fmt.Sprintf("Thanks for your data!"),
 			))
-			user.State = StateStart
+			user.State = StateSearch
 
 		} else {
 			_, _ = bot.SendMessage(tu.Message(
@@ -76,6 +76,9 @@ func DoSwitch(user *structures.User, bot *telego.Bot, msg telego.Message) {
 
 			user.State = StateStart
 		}
+	case StateSearch:
+		SearchGroupUID()
+
 	default:
 		_, _ = bot.SendMessage(tu.Message(
 			msg.Chat.ChatID(),
