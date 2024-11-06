@@ -34,5 +34,11 @@ func SearchGroupUID() {
 	}
 
 	// Обращаемся к полю children
-	fmt.Println("Children:", result)
+	for _, fillial := range result.Data.Children { // Доступ к Fillial
+    for _, faculty := range fillial.Children { // Доступ к Faculty
+        for _, group := range faculty.Children { // Доступ к Group
+            fmt.Println("Group:", group)
+        }
+    }
+}
 }
