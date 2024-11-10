@@ -4,6 +4,7 @@ type State uint
 
 type User struct {
 	State    State
+	Filial string
 	Faculty  string
 	Course   string
 	Cathedra string

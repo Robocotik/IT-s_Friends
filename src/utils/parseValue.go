@@ -6,7 +6,7 @@ import (
 
 func ParseString(bot *telego.Bot, msg telego.Message, err string, possibleData []string) string {
 	found := false
-	if msg.Text == ""{
+	if msg.Text == "" {
 		return "Я встретил пустую строку"
 	}
 	for _, data := range possibleData {
@@ -17,6 +17,7 @@ func ParseString(bot *telego.Bot, msg telego.Message, err string, possibleData [
 	}
 	if !found {
 		RiseError(bot, msg, err)
+		return "-1"
 	}
 	return msg.Text
 }
