@@ -7,8 +7,8 @@ import (
 	tu "github.com/mymmrac/telego/telegoutil"
 )
 
-func CreateKeyboardCourse(faculty string) *telego.ReplyKeyboardMarkup {
-	var courses = assets.GetCourses(faculty)
+func CreateKeyboardCourse(filial string, faculty string, cathedra string) *telego.ReplyKeyboardMarkup {
+	var courses = assets.GetCourses(filial, faculty, cathedra)
 	var items_rows [][]telego.KeyboardButton = utils.GetItemsRow(courses)
 	return tu.Keyboard(
 		items_rows...,

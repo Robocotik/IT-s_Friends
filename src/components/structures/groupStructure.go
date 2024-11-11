@@ -3,15 +3,15 @@ package structures
 type Group struct {
 	Abbr       string `json:"abbr"`
 	Uuid       string `json:"uuid"`
-	Course     uint   `json:"course"`
+	Course     int   `json:"course"`
 	NodeType   string `json:"nodeType"`
-	Semester   uint   `json:"semestr"`
+	Semester   int   `json:"semestr"`
 	ParentUuid string `json:"parentUuid"`
 }
 
 type Course struct {
 	Abbr       string  `json:"abbr"`
-	Course     uint    `json:"course"`
+	Course     int    `json:"course"`
 	NodeType   string  `json:"nodeType"`
 	ParentUuid string  `json:"parentUuid"`
 	Children   []Group `json:"children"`

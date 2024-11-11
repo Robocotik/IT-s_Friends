@@ -35,7 +35,7 @@ func SearchGroupUID(bot *telego.Bot, msg telego.Message, user *structures.User) 
 	}
 
 	filial_index := utils.IndexOf(assets.GetFilials(), user.Filial)
-	course_index := utils.IndexOf(assets.GetCourses(user.Filial), user.Course)
+	course_index := utils.IndexOf(assets.GetCourses(user.Filial, user.Faculty, user.Cathedra), user.Course)
 	faculty_index := utils.IndexOf(assets.GetFaculties(user.Filial), user.Faculty)
 	cathedra_index := utils.IndexOf(assets.GetCathedras(user.Filial, user.Faculty), user.Cathedra)
 	group_index := utils.IndexOf(assets.GetGroups(user.Filial, user.Course, user.Faculty, user.Cathedra), user.Cathedra)

@@ -8,9 +8,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strconv"
 )
 
-func GetCourses(filial string) []string {
+func GetCourses(filial string, faculty string, cathedra string) []string {
 	var courses []string
 	file, err := os.Open("D:/study/BMSTU/paradigms_structures_of_pl/IT-s_Friends/src/assets/db/structure.json")
 	if err != nil {
@@ -30,11 +31,16 @@ func GetCourses(filial string) []string {
 	courses = []string{}
 
 	filial_index := utils.IndexOf(GetFilials(), filial)
-	fmt.Println("Я нашел индекс филлиалааа ", filial_index)
+	fmt.Println("Я нашел индекс филлиалааа1 ", filial_index)
+	cathedra_index := utils.IndexOf(GetCathedras(filial, faculty), cathedra)
+	fmt.Println("Я нашел индекс кафедрыыыыы1 ", cathedra_index)
+	faculty_index := utils.IndexOf(GetFaculties(filial), faculty)
+	fmt.Println("Я нашел индекс факультета1 ", faculty_index)
 
-	for index, course := range result.Data.Children[filial_index].Children {
-		courses = append(courses, course.Abbr + emoji.Courses[index])
+	for index, course := range result.Data.Children[filial_index].Children[faculty_index].Children[cathedra_index].Children {
+		fmt.Println("КУРС: ", course.Course)
+		courses = append(courses, strconv.Itoa(course.Course)+emoji.Courses[index])
 	}
-	fmt.Sprintf("КУРСЫ: ", courses)
+	fmt.Println("КУРСЫ: ", courses)
 	return courses
 }

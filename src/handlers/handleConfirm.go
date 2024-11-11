@@ -17,8 +17,7 @@ func HandleConfirm(bot *telego.Bot, msg telego.Message, user *structures.User) {
 		msg.Chat.ChatID(),
 
 		fmt.Sprintf(
-			"Выходит твой друг учится в %sом филиале на %s, на %s%s-%s%s, верно?",
+			"Выходит твой друг учится в %s на %s, на %s%s-%s%s, верно?",
 			filial[:len(filial)-2], user.Course, user.Faculty, user.Cathedra, user.Course, user.Group),
 	).WithReplyMarkup(keyboard))
 }
- 

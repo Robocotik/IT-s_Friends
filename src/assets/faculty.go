@@ -9,7 +9,6 @@ import (
 	"os"
 )
 
-// var Fakultets [12]string = [12]string{"ИУ", "ИБМ", "МТ", "СМ", "БМТ", "РЛ", "Э", "РК", "ФН", "Л", "ЮР", "СГН"}
 
 func GetFaculties(filial string) []string {
 	var faculties []string

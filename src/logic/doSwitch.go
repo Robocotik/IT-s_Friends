@@ -2,9 +2,9 @@ package logic
 
 import (
 	"Friends/src/assets"
-	"Friends/src/utils"
 	"Friends/src/components/structures"
 	"Friends/src/handlers"
+	"Friends/src/utils"
 
 	"fmt"
 
@@ -16,9 +16,9 @@ const (
 	StateStart structures.State = iota
 	StateDefault
 	StateAskFilial
-	StateAskCourse
 	StateAskFaculty
 	StateAskCathedra
+	StateAskCourse
 	StateAskGroup
 	StateConfirm
 	StateSearch
@@ -45,26 +45,26 @@ func DoSwitch(user *structures.User, bot *telego.Bot, msg telego.Message) {
 	case StateAskFilial:
 		var filials = assets.GetFilials()
 		user.Filial = utils.ParseString(bot, msg, "филиал", filials[:])
-		handle.HandleSelectCourse(bot, msg, user.Filial)
-		user.State = StateAskCourse
-
-	case StateAskCourse:
-		var courses = assets.GetCourses(user.Filial)
-		user.Course = utils.ParseString(bot, msg, "курс", courses)
 		handle.HandleSelectFaculty(bot, msg, user.Filial)
 		user.State = StateAskFaculty
 
 	case StateAskFaculty:
 		var faculties = assets.GetFaculties(user.Filial)
 		user.Faculty = utils.ParseString(bot, msg, "факультет", faculties)
-		handle.HandleSelectCathedra(bot, msg, user.Filial,  user.Faculty)
+		handle.HandleSelectCathedra(bot, msg, user.Filial, user.Faculty)
 		user.State = StateAskCathedra
 
 	case StateAskCathedra:
 		var cathedras = assets.GetCathedras(user.Filial, user.Faculty)
 		user.Cathedra = utils.ParseString(bot, msg, "кафедра", cathedras)
-		user.State = StateAskGroup
+		user.State = StateAskCourse
+		handle.HandleSelectCourse(bot, msg, user.Filial, user.Faculty, user.Cathedra)
+
+	case StateAskCourse:
+		var courses = assets.GetCourses(user.Filial, user.Faculty, user.Cathedra)
+		user.Course = utils.ParseString(bot, msg, "курс", courses)
 		handle.HandleSelectGroup(bot, msg, user.Filial, user.Faculty, user.Course, user.Cathedra)
+		user.State = StateAskGroup
 
 	case StateAskGroup:
 
