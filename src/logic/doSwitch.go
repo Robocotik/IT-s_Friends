@@ -44,7 +44,7 @@ func DoSwitch(user *structures.User, bot *telego.Bot, msg telego.Message) {
 
 	case StateAskFilial:
 		var filials = assets.GetFilials()
-		user.Filial = utils.ParseString(bot, msg, "филиал", filials[:])
+		user.Filial = utils.ParseString(bot, msg, "филиал", filials)
 		handle.HandleSelectFaculty(bot, msg, user.Filial)
 		user.State = StateAskFaculty
 
@@ -67,8 +67,8 @@ func DoSwitch(user *structures.User, bot *telego.Bot, msg telego.Message) {
 		user.State = StateAskGroup
 
 	case StateAskGroup:
-
-		user.Group = utils.ParseString(bot, msg, "группа", assets.Group[:])
+		var groups = assets.GetGroups(user.Filial, user.Course, user.Faculty, user.Cathedra)
+		user.Group = utils.ParseString(bot, msg, "-", groups)
 		user.State = StateConfirm
 		handle.HandleConfirm(bot, msg, user)
 

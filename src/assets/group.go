@@ -2,13 +2,12 @@ package assets
 
 import (
 	"Friends/src/components/structures"
+	"Friends/src/utils"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
 )
-
-var Group [11]string = [11]string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"}
 
 func GetGroups(filial string, course string, faculty string, cathedra string) []string {
 	var groups []string
@@ -25,12 +24,23 @@ func GetGroups(filial string, course string, faculty string, cathedra string) []
 		return nil
 	}
 
+	filial_index := utils.IndexOf(GetFilials(), filial)
+	fmt.Println("Я нашел индекс филлиалааа2 ", filial_index)
+	cathedra_index := utils.IndexOf(GetCathedras(filial, faculty), cathedra)
+	fmt.Println("Я нашел индекс кафедрыыыыы2 ", cathedra_index)
+	faculty_index := utils.IndexOf(GetFaculties(filial), faculty)
+	fmt.Println("Я нашел индекс факультета2 ", faculty_index)
+	course_index := utils.IndexOf(GetCourses(filial, faculty, cathedra), course)
+	fmt.Println("Я нашел индекс факультета2 ", course_index)
+
 	var result structures.Final
 	_ = json.Unmarshal(data, &result)
 	groups = []string{}
-	for _, group := range result.Data.Children {
+
+	for _, group := range result.Data.Children[filial_index].Children[faculty_index].Children[cathedra_index].Children[course_index].Children {
 		groups = append(groups, group.Abbr)
 	}
+
 	fmt.Sprintf("ГРУППЫ: ", groups)
 	return groups
 }
