@@ -2,7 +2,7 @@ package main
 
 import (
 	"Friends/src/components/structures"
-	"Friends/src/utils"
+	"Friends/src/logic"
 	"fmt"
 	"log"
 	"os"
@@ -40,7 +40,7 @@ func main() {
 	defer bot.StopLongPolling()
 
 	bh.HandleMessage(func(bot *telego.Bot, msg telego.Message) {
-		utils.DoSwitch(&user, bot, msg)
+		logic.DoSwitch(&user, bot, msg)
 	})
 	bh.Start()
 }

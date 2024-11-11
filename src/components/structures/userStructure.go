@@ -8,4 +8,5 @@ type User struct {
 	Faculty  string
 	Course   string
 	Cathedra string
+	Group string
 }

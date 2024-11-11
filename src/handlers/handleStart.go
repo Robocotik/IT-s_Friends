@@ -1,9 +1,10 @@
 package handle
 
 import (
-	"Friends/src/components/keyboards"
+	keyboard "Friends/src/components/keyboards"
 	"Friends/src/messages"
 	"fmt"
+
 	"github.com/mymmrac/telego"
 	tu "github.com/mymmrac/telego/telegoutil"
 )

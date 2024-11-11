@@ -1,17 +1,17 @@
 package assets
 
 import (
-	"Friends/src/assets/emoji"
 	"Friends/src/components/structures"
-	"Friends/src/utils"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
 )
 
-func GetCourses(filial string) []string {
-	var courses []string
+var Group [11]string = [11]string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"}
+
+func GetGroups(filial string, course string, faculty string, cathedra string) []string {
+	var groups []string
 	file, err := os.Open("D:/study/BMSTU/paradigms_structures_of_pl/IT-s_Friends/src/assets/db/structure.json")
 	if err != nil {
 		fmt.Println("Ошибка при открытии файла:", err)
@@ -27,14 +27,10 @@ func GetCourses(filial string) []string {
 
 	var result structures.Final
 	_ = json.Unmarshal(data, &result)
-	courses = []string{}
-
-	filial_index := utils.IndexOf(GetFilials(), filial)
-	fmt.Println("Я нашел индекс филлиалааа ", filial_index)
-
-	for index, course := range result.Data.Children[filial_index].Children {
-		courses = append(courses, course.Abbr + emoji.Courses[index])
+	groups = []string{}
+	for _, group := range result.Data.Children {
+		groups = append(groups, group.Abbr)
 	}
-	fmt.Sprintf("КУРСЫ: ", courses)
-	return courses
+	fmt.Sprintf("ГРУППЫ: ", groups)
+	return groups
 }

@@ -9,11 +9,28 @@ type Group struct {
 	ParentUuid string `json:"parentUuid"`
 }
 
+type Course struct {
+	Abbr       string  `json:"abbr"`
+	Course     uint    `json:"course"`
+	NodeType   string  `json:"nodeType"`
+	ParentUuid string  `json:"parentUuid"`
+	Children   []Group `json:"children"`
+}
+
+type Cathedra struct {
+	Abbr       string   `json:"abbr"`
+	Name       string   `json:"name"`
+	Uuid       string   `json:"uuid"`
+	NodeType   string   `json:"nodeType"`
+	ParentUuid string   `json:"parentUuid"`
+	Children   []Course `json:"children"`
+}
+
 type Faculty struct {
-	Abbr     string  `json:"abbr"`
-	Name     string  `json:"name"`
-	Uuid     string  `json:"uuid"`
-	Children []Group `json:"children"` // Изменено на массив Group
+	Abbr     string     `json:"abbr"`
+	Name     string     `json:"name"`
+	Uuid     string     `json:"uuid"`
+	Children []Cathedra `json:"children"` // Изменено на массив Group
 }
 
 type Fillial struct {

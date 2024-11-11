@@ -1,16 +1,17 @@
 package handle
 
 import (
-	"Friends/src/components/keyboards"
+	keyboard "Friends/src/components/keyboards"
 	// "Friends/src/messages"
+	"fmt"
+
 	"github.com/mymmrac/telego"
 	tu "github.com/mymmrac/telego/telegoutil"
-	"fmt"
 )
 
 
-func HandleSelectCourse(bot *telego.Bot, msg telego.Message) {
-	keyboard := keyboard.CreateKeyboardCourse()
+func HandleSelectCourse(bot *telego.Bot, msg telego.Message, filial string) {
+	keyboard := keyboard.CreateKeyboardCourse(filial)
 	_, _ = bot.SendMessage(tu.Message(
 		msg.Chat.ChatID(),
 		fmt.Sprintf("Выберите курс"),

@@ -1,9 +1,11 @@
-package utils
+package logic
 
 import (
 	"Friends/src/assets"
+	"Friends/src/utils"
 	"Friends/src/components/structures"
 	"Friends/src/handlers"
+
 	"fmt"
 
 	"github.com/mymmrac/telego"
@@ -17,6 +19,7 @@ const (
 	StateAskCourse
 	StateAskFaculty
 	StateAskCathedra
+	StateAskGroup
 	StateConfirm
 	StateSearch
 )
@@ -31,7 +34,7 @@ func DoSwitch(user *structures.User, bot *telego.Bot, msg telego.Message) {
 		msg.Text = ""
 
 	case StateDefault:
-		user.Filial = ParseString(bot, msg, "Погнали", []string{"Погнали"})
+		user.Filial = utils.ParseString(bot, msg, "Погнали", []string{"Погнали"})
 		// if user.Filial == "-1" {
 		// 	user.State = StateStart
 		// 	break
@@ -40,25 +43,32 @@ func DoSwitch(user *structures.User, bot *telego.Bot, msg telego.Message) {
 		user.State = StateAskFilial
 
 	case StateAskFilial:
-		user.Filial = ParseString(bot, msg, "филиал", assets.Filials[:])
-		handle.HandleSelectCourse(bot, msg)
+		var filials = assets.GetFilials()
+		user.Filial = utils.ParseString(bot, msg, "филиал", filials[:])
+		handle.HandleSelectCourse(bot, msg, user.Filial)
 		user.State = StateAskCourse
 
 	case StateAskCourse:
-
-		user.Course = ParseString(bot, msg, "курс", assets.Courses[:])
-		handle.HandleSelectFaculty(bot, msg)
+		var courses = assets.GetCourses(user.Filial)
+		user.Course = utils.ParseString(bot, msg, "курс", courses)
+		handle.HandleSelectFaculty(bot, msg, user.Filial)
 		user.State = StateAskFaculty
 
 	case StateAskFaculty:
-
-		user.Faculty = ParseString(bot, msg, "факультет", assets.Fakultets[:])
-		handle.HandleSelectCathedra(bot, msg)
+		var faculties = assets.GetFaculties(user.Filial)
+		user.Faculty = utils.ParseString(bot, msg, "факультет", faculties)
+		handle.HandleSelectCathedra(bot, msg, user.Filial,  user.Faculty)
 		user.State = StateAskCathedra
 
 	case StateAskCathedra:
+		var cathedras = assets.GetCathedras(user.Filial, user.Faculty)
+		user.Cathedra = utils.ParseString(bot, msg, "кафедра", cathedras)
+		user.State = StateAskGroup
+		handle.HandleSelectGroup(bot, msg, user.Filial, user.Faculty, user.Course, user.Cathedra)
 
-		user.Cathedra = ParseString(bot, msg, "кафедра", assets.Cathedras[:])
+	case StateAskGroup:
+
+		user.Group = utils.ParseString(bot, msg, "группа", assets.Group[:])
 		user.State = StateConfirm
 		handle.HandleConfirm(bot, msg, user)
 
@@ -75,7 +85,7 @@ func DoSwitch(user *structures.User, bot *telego.Bot, msg telego.Message) {
 
 	case StateSearch:
 
-		SearchGroupUID(bot, msg, user.Filial, user.Course, user.Faculty, user.Cathedra)
+		SearchGroupUID(bot, msg, user)
 
 	default:
 		_, _ = bot.SendMessage(tu.Message(

@@ -1,7 +1,7 @@
 package handle
 
 import (
-	"Friends/src/components/keyboards"
+	keyboard "Friends/src/components/keyboards"
 	"Friends/src/components/structures"
 	"fmt"
 	"strings"
@@ -17,7 +17,8 @@ func HandleConfirm(bot *telego.Bot, msg telego.Message, user *structures.User) {
 		msg.Chat.ChatID(),
 
 		fmt.Sprintf(
-			"Выходит твой друг учится в %sом филиале на %s, на %s%s, верно?",
-			filial[:len(filial)-2], user.Course, user.Faculty, user.Cathedra),
+			"Выходит твой друг учится в %sом филиале на %s, на %s%s-%s%s, верно?",
+			filial[:len(filial)-2], user.Course, user.Faculty, user.Cathedra, user.Course, user.Group),
 	).WithReplyMarkup(keyboard))
 }
+ 
