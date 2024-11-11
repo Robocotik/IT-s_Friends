@@ -5,7 +5,6 @@ import (
 	"Friends/src/components/structures"
 	"Friends/src/handlers"
 	"fmt"
-	"strings"
 
 	"github.com/mymmrac/telego"
 	tu "github.com/mymmrac/telego/telegoutil"
@@ -60,31 +59,23 @@ func DoSwitch(user *structures.User, bot *telego.Bot, msg telego.Message) {
 	case StateAskCathedra:
 
 		user.Cathedra = ParseString(bot, msg, "кафедра", assets.Cathedras[:])
-		// handle.HandleSelectCathedra(bot, msg)
 		user.State = StateConfirm
-		filial := strings.Split(user.Filial, " ")[0]
-		_, _ = bot.SendMessage(tu.Message(
-			msg.Chat.ChatID(),
-			fmt.Sprintf(
-				"Выходит твой друг учится в %sом филиале на  %s, на  %s%s, верно? (Y/N)",
-				filial[:len(filial)-2], user.Course, user.Faculty, user.Cathedra,
-			),
-		))
+		handle.HandleConfirm(bot, msg, user)
+
 	case StateConfirm:
 
-		if msg.Text == "Y" {
-			_, _ = bot.SendMessage(tu.Message(
-				msg.Chat.ChatID(),
-				fmt.Sprintf("Thanks for your data!"),
-			))
+		if msg.Text == structures.YES {
+			handle.HandleThankForData(bot, msg)
 			user.State = StateSearch
 
 		} else {
 			handle.HandleSelectFilial(bot, msg)
 			user.State = StateAskFilial
 		}
+
 	case StateSearch:
-		SearchGroupUID(user.Filial, user.Course, user.Faculty, user.Cathedra)
+
+		SearchGroupUID(bot, msg, user.Filial, user.Course, user.Faculty, user.Cathedra)
 
 	default:
 		_, _ = bot.SendMessage(tu.Message(
