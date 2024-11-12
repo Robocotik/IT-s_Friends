@@ -22,6 +22,7 @@ const (
 	StateAskGroup
 	StateConfirm
 	StateSearch
+	StateGroupNotFound
 )
 
 func DoSwitch(user *structures.User, bot *telego.Bot, msg telego.Message) {
@@ -86,8 +87,17 @@ func DoSwitch(user *structures.User, bot *telego.Bot, msg telego.Message) {
 	case StateSearch:
 
 		uid := SearchGroupUID(bot, msg, user)
-		request := DoRequest(uid)
-		ShowTimetable(bot, msg, request)
+		request := DoRequest(bot, msg, uid)
+		if len(request.Data.Schedule) != 0 {
+			ShowTimetable(bot, msg, request)
+		} else {
+			handle.HandleGroupNotFound(bot, msg)
+			user.State = StateGroupNotFound
+		}
+	case StateGroupNotFound:
+		
+		handle.HandleSelectFilial(bot, msg)
+		user.State = StateAskFilial
 
 	default:
 		_, _ = bot.SendMessage(tu.Message(
