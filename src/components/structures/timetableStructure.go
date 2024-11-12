@@ -24,9 +24,9 @@ type IGroup struct {
 	Uuid string `json:"uuid"`
 }
 
-type Day struct {
-	Day        string      `json:"day"`
-	Time       string      `json:"time"`
+type IDay struct {
+	Day        int      `json:"day"`
+	Time       int      `json:"time"`
 	Week       string      `json:"week"`
 	Groups     []IGroup    `json:"groups"`
 	Stream     string      `json:"stream"`
@@ -39,10 +39,10 @@ type Day struct {
 }
 
 type IData_timetable struct {
-	Type    string `json:"type"`
-	Uuid    string `json:"uuid"`
-	Title   string `json:"title"`
-	Shedule []Day  `json:"shedule"`
+	Type     string `json:"type"`
+	Uuid     string `json:"uuid"`
+	Title    string `json:"title"`
+	Schedule []IDay  `json:"schedule"`
 }
 
 type Final_timetable struct {

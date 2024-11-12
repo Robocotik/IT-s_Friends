@@ -86,7 +86,8 @@ func DoSwitch(user *structures.User, bot *telego.Bot, msg telego.Message) {
 	case StateSearch:
 
 		uid := SearchGroupUID(bot, msg, user)
-		DoRequest(uid)
+		request := DoRequest(uid)
+		ShowTimetable(bot, msg, request)
 
 	default:
 		_, _ = bot.SendMessage(tu.Message(
