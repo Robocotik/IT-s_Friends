@@ -12,8 +12,11 @@ import (
 	tu "github.com/mymmrac/telego/telegoutil"
 )
 
+var found_uid = ""
+var last_request = structures.Final_timetable{}
 
 func DoSwitch(user *structures.User, bot *telego.Bot, msg telego.Message) {
+
 	switch user.State {
 
 	case structures.StateStart:
@@ -32,25 +35,25 @@ func DoSwitch(user *structures.User, bot *telego.Bot, msg telego.Message) {
 		user.State = structures.StateAskFilial
 
 	case structures.StateAskFilial:
-		var filials = assets.GetFilials()
+		filials := assets.GetFilials()
 		user.Filial = utils.ParseString(bot, msg, "филиал", filials)
 		handle.HandleSelectFaculty(bot, msg, user.Filial)
 		user.State = structures.StateAskFaculty
 
 	case structures.StateAskFaculty:
-		var faculties = assets.GetFaculties(user.Filial)
+		faculties := assets.GetFaculties(user.Filial)
 		user.Faculty = utils.ParseString(bot, msg, "факультет", faculties)
 		handle.HandleSelectCathedra(bot, msg, user.Filial, user.Faculty)
 		user.State = structures.StateAskCathedra
 
 	case structures.StateAskCathedra:
-		var cathedras = assets.GetCathedras(user.Filial, user.Faculty)
+		cathedras := assets.GetCathedras(user.Filial, user.Faculty)
 		user.Cathedra = utils.ParseString(bot, msg, "кафедра", cathedras)
 		user.State = structures.StateAskCourse
 		handle.HandleSelectCourse(bot, msg, user.Filial, user.Faculty, user.Cathedra)
 
 	case structures.StateAskCourse:
-		var courses = assets.GetCourses(user.Filial, user.Faculty, user.Cathedra)
+		courses := assets.GetCourses(user.Filial, user.Faculty, user.Cathedra)
 		user.Course = utils.ParseString(bot, msg, "курс", courses)
 		handle.HandleSelectGroup(bot, msg, user.Filial, user.Faculty, user.Course, user.Cathedra)
 		user.State = structures.StateAskGroup
@@ -74,15 +77,26 @@ func DoSwitch(user *structures.User, bot *telego.Bot, msg telego.Message) {
 
 	case structures.StateSearch:
 
-		uid := SearchGroupUID(bot, msg, user)
-		request := DoRequest(bot, msg, uid)
-		if len(request.Data.Schedule) != 0 {
-			ShowTimetable(bot, msg, request)
+		found_uid = SearchGroupUID(bot, msg, user)
+		last_request = DoRequest(bot, msg, found_uid)
+		if len(last_request.Data.Schedule) != 0 {
+			handle.HandleGroupFound(bot, msg)
+			user.State = structures.StateGroupFound
 		} else {
 			handle.HandleGroupNotFound(bot, msg)
-			user.State = structures.StateGroupNotFound
+			user.State = structures.StateRedirectToStartSearch
 		}
-	case structures.StateGroupNotFound:
+
+	case structures.StateGroupFound:
+		if msg.Text == structures.ADD_TO_FAVOURITE {
+			user.Favourite = append(user.Favourite, found_uid)
+			handle.HandleAddToHavourite(bot, msg)
+			user.State = structures.StateRedirectToStartSearch
+		} else {
+			ShowTimetable(bot, msg, last_request)
+		}
+
+	case structures.StateRedirectToStartSearch:
 
 		handle.HandleSelectFilial(bot, msg)
 		user.State = structures.StateAskFilial

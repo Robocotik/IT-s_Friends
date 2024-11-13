@@ -1,6 +1,5 @@
 package structures
 
-
 const (
 	StateStart State = iota
 	StateDefault
@@ -11,5 +10,6 @@ const (
 	StateAskGroup
 	StateConfirm
 	StateSearch
-	StateGroupNotFound
+	StateGroupFound
+	StateRedirectToStartSearch
 )
