@@ -13,6 +13,7 @@ import (
 )
 
 var found_uid = ""
+var ch_zn_selected = ""
 var last_request = entities.Final_timetable{}
 
 func DoSwitch(user *structures.User, bot *telego.Bot, msg telego.Message) {
@@ -59,7 +60,7 @@ func DoSwitch(user *structures.User, bot *telego.Bot, msg telego.Message) {
 
 	case structures.StateAskGroup:
 		var groups = assets.GetGroups(user.Filial, user.Course, user.Faculty, user.Cathedra)
-		user.Group = utils.ParseString(bot, msg, "-", groups)
+		user.Group = utils.ParseString(bot, msg, "группа", groups)
 		user.State = structures.StateConfirm
 		handle.HandleConfirm(bot, msg, user)
 
@@ -93,15 +94,15 @@ func DoSwitch(user *structures.User, bot *telego.Bot, msg telego.Message) {
 			user.State = structures.StateRedirectToStartSearch
 		} else {
 			user.State = structures.StateShowTimetable
-			ShowTimetable(bot, msg, last_request)
+			handle.HandleShowTimetable(bot, msg)
 		}
-	
+
 	case structures.StateShowTimetable:
-
-
+		ch_zn_selected := utils.ParseContainString(bot, msg, "Неизвестная четность недели", []string{structures.Ch, structures.Zn})
+		ShowTimetable(bot, msg, last_request, ch_zn_selected)
+		user.State = structures.StateRedirectToStartSearch
 
 	case structures.StateRedirectToStartSearch:
-
 		handle.HandleSelectFilial(bot, msg)
 		user.State = structures.StateAskFilial
 

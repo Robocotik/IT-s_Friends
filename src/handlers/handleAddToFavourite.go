@@ -9,7 +9,7 @@ import (
 )
 
 func HandleAddToHavourite(bot *telego.Bot, msg telego.Message) {
-	keyboard := keyboard.CreateKeyboardAddToFavourite()
+	keyboard := keyboard.CreateKeyboardReturnToSearch()
 	_, _ = bot.SendMessage(tu.Message(
 		msg.Chat.ChatID(),
 		fmt.Sprintf("Я добавил твоего bestie в избранное 😉"),

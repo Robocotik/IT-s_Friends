@@ -5,7 +5,7 @@ import (
 	tu "github.com/mymmrac/telego/telegoutil"
 )
 
-func CreateKeyboardGroupNotFound() *telego.ReplyKeyboardMarkup {
+func CreateKeyboardReturnToSearch() *telego.ReplyKeyboardMarkup {
 	return tu.Keyboard(
 		tu.KeyboardRow(
 			tu.KeyboardButton("Вернуться к поиску"),

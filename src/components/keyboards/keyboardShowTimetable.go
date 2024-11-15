@@ -8,18 +8,11 @@ import (
 )
 
 func CreateKeyboardShowTimetable() *telego.ReplyKeyboardMarkup {
-	isCh := utils.GetChZn() == "числитель" // переписать на словарь 
-	phrase_ch := "Числитель"
-	phrase_zn := "Знаменатель"
-	if isCh {
-		phrase_ch += " (Сегодня)"
-	} else {
-		phrase_zn += " (Сегодня)"
-	}
+	phrases := utils.GetChZnPhrases(utils.GetChZn())
 	return tu.Keyboard(
 		tu.KeyboardRow(
-			tu.KeyboardButton(phrase_ch),
-			tu.KeyboardButton(phrase_zn),
+			tu.KeyboardButton(phrases[0]),
+			tu.KeyboardButton(phrases[1]),
 		),
-	).WithResizeKeyboard().WithInputFieldPlaceholder(phrase_ch + " / " + phrase_zn).WithOneTimeKeyboard()
+	).WithResizeKeyboard().WithInputFieldPlaceholder(phrases[0] + " / " + phrases[1]).WithOneTimeKeyboard()
 }
