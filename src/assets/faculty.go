@@ -1,7 +1,7 @@
 package assets
 
 import (
-	"Friends/src/components/structures"
+	"Friends/src/entities"
 	"Friends/src/utils"
 	"encoding/json"
 	"fmt"
@@ -25,7 +25,7 @@ func GetFaculties(filial string) []string {
 		return nil
 	}
 
-	var result structures.Final
+	var result entities.Final
 	_ = json.Unmarshal(data, &result)
 	faculties = []string{}
 

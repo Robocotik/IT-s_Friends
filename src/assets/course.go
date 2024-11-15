@@ -2,7 +2,7 @@ package assets
 
 import (
 	"Friends/src/assets/emoji"
-	"Friends/src/components/structures"
+	"Friends/src/entities"
 	"Friends/src/utils"
 	"encoding/json"
 	"fmt"
@@ -26,7 +26,7 @@ func GetCourses(filial string, faculty string, cathedra string) []string {
 		return nil
 	}
 
-	var result structures.Final
+	var result entities.Final
 	_ = json.Unmarshal(data, &result)
 	courses = []string{}
 

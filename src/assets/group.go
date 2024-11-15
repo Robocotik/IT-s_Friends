@@ -1,7 +1,7 @@
 package assets
 
 import (
-	"Friends/src/components/structures"
+	"Friends/src/entities"
 	"Friends/src/utils"
 	"encoding/json"
 	"fmt"
@@ -25,15 +25,11 @@ func GetGroups(filial string, course string, faculty string, cathedra string) []
 	}
 
 	filial_index := utils.IndexOf(GetFilials(), filial)
-	fmt.Println("Я нашел индекс филлиалааа2 ", filial_index)
 	cathedra_index := utils.IndexOf(GetCathedras(filial, faculty), cathedra)
-	fmt.Println("Я нашел индекс кафедрыыыыы2 ", cathedra_index)
 	faculty_index := utils.IndexOf(GetFaculties(filial), faculty)
-	fmt.Println("Я нашел индекс факультета2 ", faculty_index)
 	course_index := utils.IndexOf(GetCourses(filial, faculty, cathedra), course)
-	fmt.Println("Я нашел индекс факультета2 ", course_index)
 
-	var result structures.Final
+	var result entities.Final
 	_ = json.Unmarshal(data, &result)
 	groups = []string{}
 

@@ -3,9 +3,9 @@ package logic
 import (
 	"Friends/src/assets"
 	"Friends/src/components/structures"
+	"Friends/src/entities"
 	"Friends/src/handlers"
 	"Friends/src/utils"
-
 	"fmt"
 
 	"github.com/mymmrac/telego"
@@ -13,20 +13,19 @@ import (
 )
 
 var found_uid = ""
-var last_request = structures.Final_timetable{}
+var last_request = entities.Final_timetable{}
 
 func DoSwitch(user *structures.User, bot *telego.Bot, msg telego.Message) {
 
 	switch user.State {
 
 	case structures.StateStart:
-		msg.Text = ""
+
 		handle.HandleStart(bot, msg)
 		user.State = structures.StateDefault
-		msg.Text = ""
 
 	case structures.StateDefault:
-		user.Filial = utils.ParseString(bot, msg, "Погнали", []string{"Погнали"})
+		_ = utils.ParseString(bot, msg, "Погнали", []string{"Погнали"})
 		// if user.Filial == "-1" {
 		// 	user.State = StateStart
 		// 	break
@@ -93,8 +92,13 @@ func DoSwitch(user *structures.User, bot *telego.Bot, msg telego.Message) {
 			handle.HandleAddToHavourite(bot, msg)
 			user.State = structures.StateRedirectToStartSearch
 		} else {
+			user.State = structures.StateShowTimetable
 			ShowTimetable(bot, msg, last_request)
 		}
+	
+	case structures.StateShowTimetable:
+
+
 
 	case structures.StateRedirectToStartSearch:
 

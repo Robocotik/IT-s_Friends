@@ -1,4 +1,4 @@
-package structures
+package entities
 
 type IDiscipline struct {
 	Abbr      string `json:"abbr"`

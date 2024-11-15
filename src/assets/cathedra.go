@@ -1,7 +1,7 @@
 package assets
 
 import (
-	"Friends/src/components/structures"
+	"Friends/src/entities"
 	"Friends/src/utils"
 	"encoding/json"
 	"fmt"
@@ -24,7 +24,7 @@ func GetCathedras(filial string, faculty string) []string {
 		return nil
 	}
 
-	var result structures.Final
+	var result entities.Final
 	_ = json.Unmarshal(data, &result)
 	cathedras = []string{}
 

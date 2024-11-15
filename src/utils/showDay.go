@@ -1,14 +1,14 @@
 package utils
 
 import (
-	"Friends/src/components/structures"
+	"Friends/src/entities"
 	"strconv"
 
 	"github.com/mymmrac/telego"
 	tu "github.com/mymmrac/telego/telegoutil"
 )
 
-func ShowDay(bot *telego.Bot, msg telego.Message, day structures.IDay, showDayName bool) {
+func ShowDay(bot *telego.Bot, msg telego.Message, day entities.IDay, showDayName bool) {
 
 	if showDayName {
 		_, _ = bot.SendMessage(tu.MessageWithEntities(tu.ID(msg.Chat.ID),

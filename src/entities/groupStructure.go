@@ -1,4 +1,4 @@
-package structures
+package entities
 
 type Group struct {
 	Abbr       string `json:"abbr"`

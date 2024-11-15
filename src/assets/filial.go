@@ -1,7 +1,7 @@
 package assets
 
 import (
-	"Friends/src/components/structures"
+	"Friends/src/entities"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -23,7 +23,7 @@ func GetFilials() []string {
 		return nil
 	}
 
-	var result structures.Final
+	var result entities.Final
 	_ = json.Unmarshal(data, &result)
 	filials = []string{}
 	for _, filial := range result.Data.Children {

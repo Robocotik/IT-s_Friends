@@ -11,5 +11,6 @@ const (
 	StateConfirm
 	StateSearch
 	StateGroupFound
+	StateShowTimetable
 	StateRedirectToStartSearch
 )
