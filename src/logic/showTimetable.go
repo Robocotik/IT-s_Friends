@@ -13,9 +13,9 @@ import (
 
 func ShowTimetable(bot *telego.Bot, msg telego.Message, request entities.Final_timetable, ch_zn_selected string) {
 	prevDay := request.Data.Schedule[0].Day
-	for index, day := range request.Data.Schedule {
-		utils.ShowDay(bot, msg, day, index == 0 || prevDay != day.Day, ch_zn_selected == "числитель")
-		prevDay = day.Day
+	for index, lesson := range request.Data.Schedule {
+		utils.ShowLesson(bot, msg, lesson, index == 0 || prevDay != lesson.Day, ch_zn_selected == "числитель")
+		prevDay = lesson.Day
 	}
 
 	keyboard := keyboard.CreateKeyboardReturnToSearch() // что - то придумать
