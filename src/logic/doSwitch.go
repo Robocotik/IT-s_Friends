@@ -6,8 +6,11 @@ import (
 	"Friends/src/entities"
 	"Friends/src/handlers"
 	"Friends/src/utils"
+	"Friends/src/utils/server"
 	"fmt"
+	"strconv"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/mymmrac/telego"
 	tu "github.com/mymmrac/telego/telegoutil"
 )
@@ -16,12 +19,12 @@ var found_uid = ""
 var ch_zn_selected = ""
 var last_request = entities.Final_timetable{}
 
-func DoSwitch(user *structures.User, bot *telego.Bot, msg telego.Message) {
+func DoSwitch(conn *pgx.Conn, user *structures.User, bot *telego.Bot, msg telego.Message) {
 
 	switch user.State {
 
 	case structures.StateStart:
-
+		server.SetUserId(conn, strconv.Itoa(int(msg.Chat.ChatID().ID)))
 		handle.HandleStart(bot, msg)
 		user.State = structures.StateDefault
 

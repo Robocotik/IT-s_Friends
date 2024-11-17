@@ -3,6 +3,8 @@ package main
 import (
 	"Friends/src/components/structures"
 	"Friends/src/logic"
+	"Friends/src/utils/server"
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -25,6 +27,8 @@ func main() {
 	bot, err := telego.NewBot(botToken, telego.WithDefaultDebugLogger())
 	botUser, _ := bot.GetMe()
 	updates, _ := bot.UpdatesViaLongPolling(nil)
+	conn := server.InitBD()
+	defer conn.Close(context.Background())
 	bh, _ := th.NewBotHandler(bot, updates)
 
 	var user structures.User
@@ -40,7 +44,7 @@ func main() {
 	defer bot.StopLongPolling()
 
 	bh.HandleMessage(func(bot *telego.Bot, msg telego.Message) {
-		logic.DoSwitch(&user, bot, msg)
+		logic.DoSwitch(conn, &user, bot, msg)
 	})
 	bh.Start()
 }

@@ -1,22 +1,22 @@
 package server
 
 import (
-	"database/sql"
-	"log"
+	"context"
+	"fmt"
 	"os"
-	"time"
 
-	_ "github.com/lib/pq"
+	"github.com/jackc/pgx/v5"
 )
 
-func SetUserId(id string) {
-	db, err := sql.Open("postgres", "user="+os.Getenv("DB_USER")+" password="+os.Getenv("DB_PASSWORD")+" host="+os.Getenv("DB_HOST")+" dbname"+os.Getenv("DB_NAME")+" sslmode=disable")
+func SetUserId(conn *pgx.Conn, id string) {
+	fmt.Sprintln("Я ДОБАВИЛ ID1: ", id)
+	_, err := conn.Exec(
+		context.Background(),
+		"insert into users (id) values ($1) on conflict (id) do nothing",
+		id,
+	)
 	if err != nil {
-		log.Fatalf("Error: Unable to connect to database: %v", err)
+		fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
+		os.Exit(1)
 	}
-	defer db.Close()
-	db.SetMaxOpenConns(100)
-	db.SetMaxIdleConns(25)
-	db.SetConnMaxLifetime(5 * time.Minute)
-
 }
