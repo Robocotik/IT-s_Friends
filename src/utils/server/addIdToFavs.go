@@ -1,13 +1,16 @@
 package server
 
 import (
+	"Friends/src/utils"
 	"context"
 	"fmt"
-	"github.com/jackc/pgx/v5"
 	"os"
+
+	"github.com/jackc/pgx/v5"
+	"github.com/mymmrac/telego"
 )
 
-func AddIdToFavs(conn *pgx.Conn, user string, id_to_add string) {
+func AddIdToFavs(bot *telego.Bot, msg telego.Message, conn *pgx.Conn, user string, id_to_add string) error {
 	fmt.Printf("\n Я ДОБАВИЛ %s в %s : \n", id_to_add, user)
 	_, err := conn.Exec(
 		context.Background(),
@@ -16,6 +19,8 @@ func AddIdToFavs(conn *pgx.Conn, user string, id_to_add string) {
 	)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
-		os.Exit(1)
+		utils.RiseError(bot, msg, err)
+		return err
 	}
+	return nil
 }

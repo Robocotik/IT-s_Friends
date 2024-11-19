@@ -4,7 +4,7 @@ import (
 	"github.com/mymmrac/telego"
 )
 
-func ParseString(bot *telego.Bot, msg telego.Message, err string, possibleData []string) string {
+func ParseString(bot *telego.Bot, msg telego.Message, err error, possibleData []string) string {
 	found := false
 	if msg.Text == "" {
 		return "Я встретил пустую строку"

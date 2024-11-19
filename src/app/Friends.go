@@ -27,7 +27,7 @@ func main() {
 	bot, err := telego.NewBot(botToken, telego.WithDefaultDebugLogger())
 	botUser, _ := bot.GetMe()
 	updates, _ := bot.UpdatesViaLongPolling(nil)
-	conn := server.InitBD()
+	conn, err := server.InitBD()
 	defer conn.Close(context.Background())
 	bh, _ := th.NewBotHandler(bot, updates)
 

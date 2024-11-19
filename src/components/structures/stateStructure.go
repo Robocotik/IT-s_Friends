@@ -3,6 +3,7 @@ package structures
 const (
 	StateStart State = iota
 	StateDefault
+	StateStartMenu
 	StateAskFilial
 	StateAskFaculty
 	StateAskCathedra
@@ -11,6 +12,7 @@ const (
 	StateConfirm
 	StateSearch
 	StateGroupFound
+	StateAskNickname
 	StateShowTimetable
 	StateRedirectToStartSearch
 )

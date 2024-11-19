@@ -9,5 +9,6 @@ type User struct {
 	Course    string
 	Cathedra  string
 	Group     string
-	Favourite []string
+	Favourite []Fav
+	NickName  string
 }
