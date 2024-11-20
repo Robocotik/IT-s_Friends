@@ -22,7 +22,7 @@ func GetFavsFromId(conn *pgx.Conn, id int64) ([]structures.Fav, error) {
 		if err == pgx.ErrNoRows {
 			return nil, nil
 		}
-		fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
+		fmt.Fprintf(os.Stderr, "QueryRow failed in get friends: %v\n", err)
 		return nil, err
 	}
 

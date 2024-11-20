@@ -55,7 +55,6 @@ func main() {
 			user = &structures.User{
 				Id:        userID,
 				State:     structures.StateStart,
-				Favourite: []structures.Fav{},
 				// Заполните другие поля структуры, если необходимо
 			}
 			UserSessions[userID] = user

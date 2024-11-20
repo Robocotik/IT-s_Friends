@@ -19,11 +19,9 @@ var ch_zn_selected = ""
 var last_request = entities.Final_timetable{}
 
 func DoSwitch(conn *pgx.Conn, user *structures.User, friend *structures.AskedFriend, bot *telego.Bot, msg telego.Message) {
-	var user_uid = msg.Chat.ChatID().ID
 	var err error
 	switch user.State {
 	case structures.StateStart:
-		server.SetUserId(conn, user_uid)
 		handle.HandleStart(bot, msg)
 		user.State = structures.StateDefault
 
@@ -37,6 +35,7 @@ func DoSwitch(conn *pgx.Conn, user *structures.User, friend *structures.AskedFri
 		user.State = structures.StateStartMenu
 
 	case structures.StateStartMenu:
+		server.SetUserId(bot, msg, conn, msg.Chat.ChatID().ID, msg.From.Username)
 		_, err = utils.ParseString(bot, msg, errors.New("ответ"), []string{structures.FIND_NEW_FRIENDS, structures.SHOW_FRIENDS})
 		if err != nil {
 			handle.HandleMenuStart(bot, msg)
@@ -46,7 +45,7 @@ func DoSwitch(conn *pgx.Conn, user *structures.User, friend *structures.AskedFri
 			handle.HandleSelectFilial(bot, msg)
 			user.State = structures.StateAskFilial
 		} else {
-			favs, err := server.GetFavsFromId(conn, user_uid)
+			favs, err := server.GetFavsFromId(conn, msg.Chat.ChatID().ID)
 			utils.RiseError(bot, msg, err)
 			utils.FuncWithKeyboard(bot, msg, func() []string {
 				return utils.ShowFavs(favs)
@@ -149,11 +148,8 @@ func DoSwitch(conn *pgx.Conn, user *structures.User, friend *structures.AskedFri
 	case structures.StateAskNickname:
 		friend.NickName = msg.Text
 		handle.HandleAddToHavourite(bot, msg)
-		user.Favourite = append(user.Favourite, structures.Fav{
-			Nickname: friend.NickName,
-			Id:       found_uid,
-		})
-		server.AddIdToFavs(bot, msg, conn, user_uid, found_uid)
+		friend_id, _ := server.AddFriend(bot, msg, conn, friend.NickName, found_uid)
+		server.AddConnection(bot, msg, conn, msg.Chat.ChatID().ID, friend_id)
 		user.State = structures.StateRedirectToStartSearch
 
 	case structures.StateShowTimetable: // Вывод расписания
