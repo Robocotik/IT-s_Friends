@@ -9,11 +9,9 @@ import (
 	"Friends/src/utils"
 	"Friends/src/utils/server"
 	"errors"
-	"fmt"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/mymmrac/telego"
-	tu "github.com/mymmrac/telego/telegoutil"
 )
 
 var found_uid = ""
@@ -22,24 +20,28 @@ var last_request = entities.Final_timetable{}
 
 func DoSwitch(conn *pgx.Conn, user *structures.User, friend *structures.AskedFriend, bot *telego.Bot, msg telego.Message) {
 	var user_uid = msg.Chat.ChatID().ID
-
+	var err error
 	switch user.State {
-
 	case structures.StateStart:
 		server.SetUserId(conn, user_uid)
 		handle.HandleStart(bot, msg)
 		user.State = structures.StateDefault
 
 	case structures.StateDefault:
-		_ = utils.ParseString(bot, msg, errors.New("Погнали"), []string{"Погнали"})
-		// if user.Filial == "-1" {
-		// 	user.State = StateStart
-		// 	break
-		// }
+		_, err = utils.ParseString(bot, msg, errors.New("ответ"), []string{"Погнали"})
+		if err != nil {
+			handle.HandleStart(bot, msg)
+			break
+		}
 		handle.HandleMenuStart(bot, msg)
 		user.State = structures.StateStartMenu
 
 	case structures.StateStartMenu:
+		_, err = utils.ParseString(bot, msg, errors.New("ответ"), []string{structures.FIND_NEW_FRIENDS, structures.SHOW_FRIENDS})
+		if err != nil {
+			handle.HandleMenuStart(bot, msg)
+			break
+		}
 		if msg.Text == structures.FIND_NEW_FRIENDS {
 			handle.HandleSelectFilial(bot, msg)
 			user.State = structures.StateAskFilial
@@ -55,36 +57,60 @@ func DoSwitch(conn *pgx.Conn, user *structures.User, friend *structures.AskedFri
 
 	case structures.StateAskFilial:
 		filials := assets.GetFilials()
-		friend.Filial = utils.ParseString(bot, msg, errors.New("филиал"), filials)
+		friend.Filial, err = utils.ParseString(bot, msg, errors.New("филиал"), filials)
+		if err != nil {
+			handle.HandleSelectFilial(bot, msg)
+			break
+		}
 		handle.HandleSelectFaculty(bot, msg, friend)
 		user.State = structures.StateAskFaculty
 
 	case structures.StateAskFaculty:
 		faculties := assets.GetFaculties(friend.Filial)
-		friend.Faculty = utils.ParseString(bot, msg, errors.New("факультет"), faculties)
+		friend.Faculty, err = utils.ParseString(bot, msg, errors.New("факультет"), faculties)
+		if err != nil {
+			handle.HandleSelectFaculty(bot, msg, friend)
+			break
+		}
 		handle.HandleSelectCathedra(bot, msg, friend)
 		user.State = structures.StateAskCathedra
 
 	case structures.StateAskCathedra:
 		cathedras := assets.GetCathedras(friend.Filial, friend.Faculty)
-		friend.Cathedra = utils.ParseString(bot, msg, errors.New("кафедра"), cathedras)
+		friend.Cathedra, err = utils.ParseString(bot, msg, errors.New("кафедра"), cathedras)
+		if err != nil {
+			handle.HandleSelectCathedra(bot, msg, friend)
+			break
+		}
 		user.State = structures.StateAskCourse
 		handle.HandleSelectCourse(bot, msg, friend)
 
 	case structures.StateAskCourse:
 		courses := assets.GetCourses(friend.Filial, friend.Faculty, friend.Cathedra)
-		friend.Course = utils.ParseString(bot, msg, errors.New("курс"), courses)
+		friend.Course, err = utils.ParseString(bot, msg, errors.New("курс"), courses)
+		if err != nil {
+			handle.HandleSelectCourse(bot, msg, friend)
+			break
+		}
 		handle.HandleSelectGroup(bot, msg, friend)
 		user.State = structures.StateAskGroup
 
 	case structures.StateAskGroup:
 		var groups = assets.GetGroups(friend.Filial, friend.Course, friend.Faculty, friend.Cathedra)
-		friend.Group = utils.ParseString(bot, msg, errors.New("группа"), groups)
+		friend.Group, err = utils.ParseString(bot, msg, errors.New("группа"), groups)
+		if err != nil {
+			handle.HandleSelectGroup(bot, msg, friend)
+			break
+		}
 		user.State = structures.StateConfirm
 		handle.HandleConfirm(bot, msg, friend)
 
 	case structures.StateConfirm:
-
+		_, err = utils.ParseString(bot, msg, errors.New("ответ"), []string{structures.YES, structures.NO})
+		if err != nil {
+			handle.HandleConfirm(bot, msg, friend)
+			break
+		}
 		if msg.Text == structures.YES {
 			handle.HandleThankForData(bot, msg)
 			user.State = structures.StateSearch
@@ -107,6 +133,11 @@ func DoSwitch(conn *pgx.Conn, user *structures.User, friend *structures.AskedFri
 		}
 
 	case structures.StateGroupFound: // Группа была найдена
+		_, err = utils.ParseString(bot, msg, errors.New("ответ"), []string{structures.ADD_TO_FAVOURITE, structures.SHOW_SCHEDULE})
+		if err != nil {
+			handle.HandleConfirm(bot, msg, friend)
+			break
+		}
 		if msg.Text == structures.ADD_TO_FAVOURITE {
 			handle.HandleSelectNickname(bot, msg)
 			user.State = structures.StateAskNickname
@@ -120,7 +151,7 @@ func DoSwitch(conn *pgx.Conn, user *structures.User, friend *structures.AskedFri
 		handle.HandleAddToHavourite(bot, msg)
 		user.Favourite = append(user.Favourite, structures.Fav{
 			Nickname: friend.NickName,
-			Id:      found_uid,
+			Id:       found_uid,
 		})
 		server.AddIdToFavs(bot, msg, conn, user_uid, found_uid)
 		user.State = structures.StateRedirectToStartSearch
@@ -135,10 +166,7 @@ func DoSwitch(conn *pgx.Conn, user *structures.User, friend *structures.AskedFri
 		user.State = structures.StateAskFilial
 
 	default:
-		_, _ = bot.SendMessage(tu.Message(
-			msg.Chat.ChatID(),
-			fmt.Sprintf("Неизвестная команда"),
-		))
+		utils.WriteMessage(bot, msg, "Неизвестная команда")
 		panic("unknown state")
 	}
 }
