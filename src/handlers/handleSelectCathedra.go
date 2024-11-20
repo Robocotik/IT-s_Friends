@@ -2,6 +2,7 @@ package handle
 
 import (
 	keyboard "Friends/src/components/keyboards"
+	"Friends/src/components/structures"
 	"fmt"
 
 	"github.com/mymmrac/telego"
@@ -9,8 +10,8 @@ import (
 )
 
 
-func HandleSelectCathedra(bot *telego.Bot, msg telego.Message, filial string, faculty string) {
-	keyboard := keyboard.CreateKeyboardCathedra(filial, faculty)
+func HandleSelectCathedra(bot *telego.Bot, msg telego.Message, friend *structures.AskedFriend) {
+	keyboard := keyboard.CreateKeyboardCathedra(friend.Filial, friend.Faculty)
 	_, _ = bot.SendMessage(tu.Message(
 		msg.Chat.ChatID(),
 		fmt.Sprintf("Выберите кафедру"),

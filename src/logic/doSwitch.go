@@ -56,25 +56,25 @@ func DoSwitch(conn *pgx.Conn, user *structures.User, friend *structures.AskedFri
 	case structures.StateAskFilial:
 		filials := assets.GetFilials()
 		friend.Filial = utils.ParseString(bot, msg, errors.New("филиал"), filials)
-		handle.HandleSelectFaculty(bot, msg, friend.Filial)
+		handle.HandleSelectFaculty(bot, msg, friend)
 		user.State = structures.StateAskFaculty
 
 	case structures.StateAskFaculty:
 		faculties := assets.GetFaculties(friend.Filial)
 		friend.Faculty = utils.ParseString(bot, msg, errors.New("факультет"), faculties)
-		handle.HandleSelectCathedra(bot, msg, friend.Filial, friend.Faculty)
+		handle.HandleSelectCathedra(bot, msg, friend)
 		user.State = structures.StateAskCathedra
 
 	case structures.StateAskCathedra:
 		cathedras := assets.GetCathedras(friend.Filial, friend.Faculty)
 		friend.Cathedra = utils.ParseString(bot, msg, errors.New("кафедра"), cathedras)
 		user.State = structures.StateAskCourse
-		handle.HandleSelectCourse(bot, msg, friend.Filial, friend.Faculty, friend.Cathedra)
+		handle.HandleSelectCourse(bot, msg, friend)
 
 	case structures.StateAskCourse:
 		courses := assets.GetCourses(friend.Filial, friend.Faculty, friend.Cathedra)
 		friend.Course = utils.ParseString(bot, msg, errors.New("курс"), courses)
-		handle.HandleSelectGroup(bot, msg, friend.Filial, friend.Faculty, friend.Course, friend.Cathedra)
+		handle.HandleSelectGroup(bot, msg, friend)
 		user.State = structures.StateAskGroup
 
 	case structures.StateAskGroup:
