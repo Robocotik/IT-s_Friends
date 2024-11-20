@@ -1,13 +1,16 @@
 package utils
 
-import (
-	// "Friends/src/components/structures"
-)
+import "Friends/src/components/structures"
 
-func ShowFavs(favs []string) []string {
+func ShowFavs(favs []structures.Fav) []string {
 	if len(favs) == 0 {
 		return []string{}
 	}
 
-	return favs
+	res := []string{}
+	for _, fav := range favs {
+		res = append(res, fav.Nickname)
+	}
+
+	return res
 }

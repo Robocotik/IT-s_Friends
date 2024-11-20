@@ -10,7 +10,7 @@ import (
 	"github.com/mymmrac/telego"
 )
 
-func AddIdToFavs(bot *telego.Bot, msg telego.Message, conn *pgx.Conn, user string, id_to_add string) error {
+func AddIdToFavs(bot *telego.Bot, msg telego.Message, conn *pgx.Conn, user int64, id_to_add string) error {
 	fmt.Printf("\n Я ДОБАВИЛ %s в %s : \n", id_to_add, user)
 	_, err := conn.Exec(
 		context.Background(),

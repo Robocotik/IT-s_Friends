@@ -10,7 +10,6 @@ import (
 	"Friends/src/utils/server"
 	"errors"
 	"fmt"
-	"strconv"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/mymmrac/telego"
@@ -21,14 +20,13 @@ var found_uid = ""
 var ch_zn_selected = ""
 var last_request = entities.Final_timetable{}
 
-func DoSwitch(conn *pgx.Conn, user *structures.User, bot *telego.Bot, msg telego.Message) {
-	var user_uid = strconv.Itoa(int(msg.Chat.ChatID().ID))
-	var user_username = msg.Chat.ChatID().Username
+func DoSwitch(conn *pgx.Conn, user *structures.User, friend *structures.AskedFriend, bot *telego.Bot, msg telego.Message) {
+	var user_uid = msg.Chat.ChatID().ID
 
 	switch user.State {
 
 	case structures.StateStart:
-		server.SetUserId(conn, user_uid, user_username)
+		server.SetUserId(conn, user_uid)
 		handle.HandleStart(bot, msg)
 		user.State = structures.StateDefault
 
@@ -57,33 +55,33 @@ func DoSwitch(conn *pgx.Conn, user *structures.User, bot *telego.Bot, msg telego
 
 	case structures.StateAskFilial:
 		filials := assets.GetFilials()
-		user.Filial = utils.ParseString(bot, msg, errors.New("филиал"), filials)
-		handle.HandleSelectFaculty(bot, msg, user.Filial)
+		friend.Filial = utils.ParseString(bot, msg, errors.New("филиал"), filials)
+		handle.HandleSelectFaculty(bot, msg, friend.Filial)
 		user.State = structures.StateAskFaculty
 
 	case structures.StateAskFaculty:
-		faculties := assets.GetFaculties(user.Filial)
-		user.Faculty = utils.ParseString(bot, msg, errors.New("факультет"), faculties)
-		handle.HandleSelectCathedra(bot, msg, user.Filial, user.Faculty)
+		faculties := assets.GetFaculties(friend.Filial)
+		friend.Faculty = utils.ParseString(bot, msg, errors.New("факультет"), faculties)
+		handle.HandleSelectCathedra(bot, msg, friend.Filial, friend.Faculty)
 		user.State = structures.StateAskCathedra
 
 	case structures.StateAskCathedra:
-		cathedras := assets.GetCathedras(user.Filial, user.Faculty)
-		user.Cathedra = utils.ParseString(bot, msg, errors.New("кафедра"), cathedras)
+		cathedras := assets.GetCathedras(friend.Filial, friend.Faculty)
+		friend.Cathedra = utils.ParseString(bot, msg, errors.New("кафедра"), cathedras)
 		user.State = structures.StateAskCourse
-		handle.HandleSelectCourse(bot, msg, user.Filial, user.Faculty, user.Cathedra)
+		handle.HandleSelectCourse(bot, msg, friend.Filial, friend.Faculty, friend.Cathedra)
 
 	case structures.StateAskCourse:
-		courses := assets.GetCourses(user.Filial, user.Faculty, user.Cathedra)
-		user.Course = utils.ParseString(bot, msg, errors.New("курс"), courses)
-		handle.HandleSelectGroup(bot, msg, user.Filial, user.Faculty, user.Course, user.Cathedra)
+		courses := assets.GetCourses(friend.Filial, friend.Faculty, friend.Cathedra)
+		friend.Course = utils.ParseString(bot, msg, errors.New("курс"), courses)
+		handle.HandleSelectGroup(bot, msg, friend.Filial, friend.Faculty, friend.Course, friend.Cathedra)
 		user.State = structures.StateAskGroup
 
 	case structures.StateAskGroup:
-		var groups = assets.GetGroups(user.Filial, user.Course, user.Faculty, user.Cathedra)
-		user.Group = utils.ParseString(bot, msg, errors.New("группа"), groups)
+		var groups = assets.GetGroups(friend.Filial, friend.Course, friend.Faculty, friend.Cathedra)
+		friend.Group = utils.ParseString(bot, msg, errors.New("группа"), groups)
 		user.State = structures.StateConfirm
-		handle.HandleConfirm(bot, msg, user)
+		handle.HandleConfirm(bot, msg, friend)
 
 	case structures.StateConfirm:
 
@@ -98,7 +96,7 @@ func DoSwitch(conn *pgx.Conn, user *structures.User, bot *telego.Bot, msg telego
 
 	case structures.StateSearch:
 
-		found_uid = SearchGroupUID(bot, msg, user)
+		found_uid = SearchGroupUID(bot, msg, friend)
 		last_request = DoRequest(bot, msg, found_uid)
 		if len(last_request.Data.Schedule) != 0 { // проверка на наличие расписания
 			handle.HandleGroupFound(bot, msg)
@@ -118,13 +116,11 @@ func DoSwitch(conn *pgx.Conn, user *structures.User, bot *telego.Bot, msg telego
 		}
 
 	case structures.StateAskNickname:
-		user.NickName = msg.Text
+		friend.NickName = msg.Text
 		handle.HandleAddToHavourite(bot, msg)
-		id, err := strconv.Atoi(found_uid)
-		utils.RiseError(bot, msg, err)
 		user.Favourite = append(user.Favourite, structures.Fav{
-			Nickname: user.NickName,
-			Id:       int64(id),
+			Nickname: friend.NickName,
+			Id:      found_uid,
 		})
 		server.AddIdToFavs(bot, msg, conn, user_uid, found_uid)
 		user.State = structures.StateRedirectToStartSearch

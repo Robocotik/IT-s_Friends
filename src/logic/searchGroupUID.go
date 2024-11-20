@@ -13,7 +13,7 @@ import (
 	"github.com/mymmrac/telego"
 )
 
-func SearchGroupUID(bot *telego.Bot, msg telego.Message, user *structures.User) string {
+func SearchGroupUID(bot *telego.Bot, msg telego.Message, friend *structures.AskedFriend) string {
 	file, err := os.Open("D:/study/BMSTU/paradigms_structures_of_pl/IT-s_Friends/src/assets/db/structure.json")
 	if err != nil {
 		fmt.Println("Ошибка при открытии файла:", err)
@@ -35,11 +35,11 @@ func SearchGroupUID(bot *telego.Bot, msg telego.Message, user *structures.User) 
 		return "-1"
 	}
 
-	filial_index := utils.IndexOf(assets.GetFilials(), user.Filial) // Переписать 
-	course_index := utils.IndexOf(assets.GetCourses(user.Filial, user.Faculty, user.Cathedra), user.Course)
-	faculty_index := utils.IndexOf(assets.GetFaculties(user.Filial), user.Faculty)
-	cathedra_index := utils.IndexOf(assets.GetCathedras(user.Filial, user.Faculty), user.Cathedra)
-	group_index := utils.IndexOf(assets.GetGroups(user.Filial, user.Course, user.Faculty, user.Cathedra), user.Group)
+	filial_index := utils.IndexOf(assets.GetFilials(), friend.Filial) // Переписать 
+	course_index := utils.IndexOf(assets.GetCourses(friend.Filial, friend.Faculty, friend.Cathedra), friend.Course)
+	faculty_index := utils.IndexOf(assets.GetFaculties(friend.Filial), friend.Faculty)
+	cathedra_index := utils.IndexOf(assets.GetCathedras(friend.Filial, friend.Faculty), friend.Cathedra)
+	group_index := utils.IndexOf(assets.GetGroups(friend.Filial, friend.Course, friend.Faculty, friend.Cathedra), friend.Group)
 
 
 	fmt.Println("UUUUIID:", result.Data.Children[filial_index].Children[faculty_index].Children[cathedra_index].Children[course_index].Children[group_index].Uuid)

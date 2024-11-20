@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sync"
 
 	"github.com/joho/godotenv"
 	"github.com/mymmrac/telego"
@@ -23,6 +24,8 @@ func init() {
 }
 
 func main() {
+	var UserSessions = make(map[int64]*structures.User) // Используйте int64 для ID пользователя
+	var mu sync.Mutex                                   // Мьютекс для синхронизации доступа к UserSessions
 	botToken := os.Getenv("TOKEN")
 	bot, err := telego.NewBot(botToken, telego.WithDefaultDebugLogger())
 	botUser, _ := bot.GetMe()
@@ -30,8 +33,6 @@ func main() {
 	conn, err := server.InitBD()
 	defer conn.Close(context.Background())
 	bh, _ := th.NewBotHandler(bot, updates)
-
-	var user structures.User
 
 	if err != nil {
 		fmt.Println(err)
@@ -44,7 +45,22 @@ func main() {
 	defer bot.StopLongPolling()
 
 	bh.HandleMessage(func(bot *telego.Bot, msg telego.Message) {
-		logic.DoSwitch(conn, &user, bot, msg)
+		mu.Lock() // Блокируем доступ к UserSessions
+		defer mu.Unlock()
+		userID := msg.From.ID
+		// Проверяем, есть ли уже сессия для этого пользователя
+		user, exists := UserSessions[userID]
+		if !exists {
+			// Если сессии нет, создаем новую
+			user = &structures.User{
+				Id:        userID,
+				State:     structures.StateStart,
+				Favourite: []structures.Fav{},
+				// Заполните другие поля структуры, если необходимо
+			}
+			UserSessions[userID] = user
+		}
+		logic.DoSwitch(conn, UserSessions[userID],&UserSessions[userID].Friend , bot, msg)
 	})
 	bh.Start()
 }

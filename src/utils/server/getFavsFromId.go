@@ -1,18 +1,20 @@
 package server
 
 import (
+	"Friends/src/components/structures"
 	"context"
 	"fmt"
-	"github.com/jackc/pgx/v5"
 	"os"
+
+	"github.com/jackc/pgx/v5"
 )
 
-func GetFavsFromId(conn *pgx.Conn, id string) ([]string, error) {
-	var favourites []string
+func GetFavsFromId(conn *pgx.Conn, id int64) ([]structures.Fav, error) {
+	favourites := []structures.Fav{}
 
 	err := conn.QueryRow(
 		context.Background(),
-		"SELECT favourites FROM users WHERE id = $1",
+		"SELECT favourites::json FROM users WHERE id = $1",
 		id,
 	).Scan(&favourites)
 
