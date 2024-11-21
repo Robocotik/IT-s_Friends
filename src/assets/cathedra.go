@@ -3,6 +3,7 @@ package assets
 import (
 	"Friends/src/entities"
 	"Friends/src/utils"
+
 	"encoding/json"
 	"fmt"
 	"io/ioutil"

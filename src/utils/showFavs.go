@@ -1,16 +1,17 @@
 package utils
 
-import "Friends/src/components/structures"
+import (
+	"Friends/src/components/structures"
+	"errors"
+)
 
-func ShowFavs(favs []structures.Fav) []string {
+func ShowFavs(favs []structures.IFriendsShort) (string, error) {
 	if len(favs) == 0 {
-		return []string{}
+		return "", errors.New("no friends")
 	}
-
-	res := []string{}
-	for _, fav := range favs {
-		res = append(res, fav.Nickname)
+	var res string
+	for _, friend := range favs {
+		res += "🐘 " + friend.Nickname + " | " + friend.Group_title + "\n"
 	}
-
-	return res
+	return res, nil
 }

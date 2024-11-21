@@ -4,7 +4,6 @@ import (
 	"Friends/src/assets"
 	keyboard "Friends/src/components/keyboards"
 	"Friends/src/components/structures"
-	"Friends/src/entities"
 	"Friends/src/handlers"
 	"Friends/src/utils"
 	"Friends/src/utils/server"
@@ -14,9 +13,7 @@ import (
 	"github.com/mymmrac/telego"
 )
 
-var found_uid = ""
 var ch_zn_selected = ""
-var last_request = entities.Final_timetable{}
 
 func DoSwitch(conn *pgx.Conn, user *structures.User, friend *structures.AskedFriend, bot *telego.Bot, msg telego.Message) {
 	var err error
@@ -35,7 +32,7 @@ func DoSwitch(conn *pgx.Conn, user *structures.User, friend *structures.AskedFri
 		user.State = structures.StateStartMenu
 
 	case structures.StateStartMenu:
-		server.SetUserId(bot, msg, conn, msg.Chat.ChatID().ID, msg.From.Username)
+		server.AddUserId(bot, msg, conn, msg.Chat.ChatID().ID, msg.From.Username)
 		_, err = utils.ParseString(bot, msg, errors.New("ответ"), []string{structures.FIND_NEW_FRIENDS, structures.SHOW_FRIENDS})
 		if err != nil {
 			handle.HandleMenuStart(bot, msg)
@@ -45,9 +42,9 @@ func DoSwitch(conn *pgx.Conn, user *structures.User, friend *structures.AskedFri
 			handle.HandleSelectFilial(bot, msg)
 			user.State = structures.StateAskFilial
 		} else {
-			favs, err := server.GetFavsFromId(conn, msg.Chat.ChatID().ID)
+			favs, err := server.GetFriendsFromId(conn, msg.Chat.ChatID().ID)
 			utils.RiseError(bot, msg, err)
-			utils.FuncWithKeyboard(bot, msg, func() []string {
+			utils.FuncWithKeyboard(bot, msg, func() (string, error) {
 				return utils.ShowFavs(favs)
 			}, keyboard.CreateKeyboardReturnToSearch())
 			user.State = structures.StateRedirectToStartSearch
@@ -121,9 +118,9 @@ func DoSwitch(conn *pgx.Conn, user *structures.User, friend *structures.AskedFri
 
 	case structures.StateSearch:
 
-		found_uid = SearchGroupUID(bot, msg, friend)
-		last_request = DoRequest(bot, msg, found_uid)
-		if len(last_request.Data.Schedule) != 0 { // проверка на наличие расписания
+		friend.Uuid = SearchGroupUID(bot, msg, friend)
+		friend.Request = DoRequest(bot, msg, friend.Uuid)
+		if len(friend.Request.Data.Schedule) != 0 { // проверка на наличие расписания
 			handle.HandleGroupFound(bot, msg)
 			user.State = structures.StateGroupFound
 		} else {
@@ -148,18 +145,20 @@ func DoSwitch(conn *pgx.Conn, user *structures.User, friend *structures.AskedFri
 	case structures.StateAskNickname:
 		friend.NickName = msg.Text
 		handle.HandleAddToHavourite(bot, msg)
-		friend_id, _ := server.AddFriend(bot, msg, conn, friend.NickName, found_uid)
-		server.AddConnection(bot, msg, conn, msg.Chat.ChatID().ID, friend_id)
+		friend_id, err := server.AddFriend(bot, msg, conn, friend)
+		if err == nil {
+			server.AddConnection(bot, msg, conn, msg.Chat.ChatID().ID, friend_id)
+		}
 		user.State = structures.StateRedirectToStartSearch
 
 	case structures.StateShowTimetable: // Вывод расписания
 		ch_zn_selected := utils.ParseContainString(bot, msg, errors.New("Неизвестная четность недели"), []string{structures.Ch, structures.Zn})
-		ShowTimetable(bot, msg, last_request, ch_zn_selected)
+		ShowTimetable(bot, msg, friend.Request, ch_zn_selected)
 		user.State = structures.StateRedirectToStartSearch
 
 	case structures.StateRedirectToStartSearch:
-		handle.HandleSelectFilial(bot, msg)
-		user.State = structures.StateAskFilial
+		handle.HandleMenuStart(bot, msg)
+		user.State = structures.StateStartMenu
 
 	default:
 		utils.WriteMessage(bot, msg, "Неизвестная команда")

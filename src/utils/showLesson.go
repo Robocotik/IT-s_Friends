@@ -2,7 +2,7 @@ package utils
 
 import (
 	// "Friends/src/components/structures"
-	"Friends/src/components/structures"
+
 	"Friends/src/entities"
 	"strconv"
 
@@ -10,7 +10,7 @@ import (
 	tu "github.com/mymmrac/telego/telegoutil"
 )
 
-func ShowLesson(bot *telego.Bot, msg telego.Message, lesson entities.IDay, showDayName bool, isCh bool, isLast bool) {
+func ShowLesson(msg telego.Message, lesson entities.IDay, isCh bool) []tu.MessageEntityCollection {
 	dataToShowBold := "-1"
 	dataToShow := "-1"
 	dataToShowCabinet := ""
@@ -19,31 +19,24 @@ func ShowLesson(bot *telego.Bot, msg telego.Message, lesson entities.IDay, showD
 			dataToShowCabinet += audience.Name + ", "
 		}
 	}
-	if dataToShowCabinet == ""{
+	if dataToShowCabinet == "" {
 		dataToShowCabinet = "Кабинет не указан"
 	}
 	if (isCh && lesson.Week != "zn") || (!isCh && lesson.Week != "ch") {
-		dataToShow = "📅 " + strconv.Itoa(lesson.Time) + " пара ( " + lesson.StartTime + " - " + lesson.EndTime + ")\n\n"
-		dataToShowBold = "🎓 " + (lesson.Discipline.FullName) + "\n\n"
-		dataToShowCabinet = "🚪 " + dataToShowCabinet
+		dataToShow = "📅 " + strconv.Itoa(lesson.Time) + " пара ( " + lesson.StartTime + " - " + lesson.EndTime + " )\n"
+		dataToShowBold = "🎓 " + (lesson.Discipline.FullName) + "\n"
+		dataToShowCabinet = "🚪 " + dataToShowCabinet[:len(dataToShowCabinet)-2] + "\n\n"
 	}
 	if dataToShowBold == "-1" {
-		return
+		return nil
 	}
-	dayPhrase := ""
-	if showDayName {
-		dayPhrase = GetPhrase(lesson.Day) + "\n\n\n"
-	}
-	_, _ = bot.SendMessage(tu.MessageWithEntities(tu.ID(msg.Chat.ID),
-		tu.Entity(dayPhrase).Underline(),
+
+	res := []tu.MessageEntityCollection{
+		
 		tu.Entity(dataToShow),
 		tu.Entity(dataToShowBold).Bold(),
 		tu.Entity(dataToShowCabinet),
-	))
-	if !isLast {
-		_, _ = bot.SendMessage(tu.MessageWithEntities(tu.ID(msg.Chat.ID),
-			tu.Entity(structures.BorderMinus),
-		))
 	}
+	return res
 
 }

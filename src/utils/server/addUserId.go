@@ -10,7 +10,7 @@ import (
 	"github.com/mymmrac/telego"
 )
 
-func SetUserId(bot *telego.Bot, msg telego.Message, conn *pgx.Conn, id int64, nickname string) error {
+func AddUserId(bot *telego.Bot, msg telego.Message, conn *pgx.Conn, id int64, nickname string) error {
 	fmt.Println("Я ДОБАВИЛ ID1: ", id, nickname)
 	_, err := conn.Exec(context.Background(), "INSERT INTO users (id, nickname) VALUES ($1, $2) on conflict (id) do nothing", id, nickname)
 	if err != nil {
