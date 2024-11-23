@@ -118,7 +118,7 @@ func DoSwitch(conn *pgx.Conn, user *structures.User, friend *structures.AskedFri
 
 	case structures.StateSearch:
 
-		friend.Uuid = SearchGroupUID(bot, msg, friend)
+		friend.Uuid= SearchGroupUID(bot, msg, conn, friend)
 		friend.Request = DoRequest(bot, msg, friend.Uuid)
 		if len(friend.Request.Data.Schedule) != 0 { // проверка на наличие расписания
 			handle.HandleGroupFound(bot, msg)

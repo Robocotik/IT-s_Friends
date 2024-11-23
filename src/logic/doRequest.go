@@ -26,6 +26,5 @@ func DoRequest(bot *telego.Bot, msg telego.Message, uid string) entities.Final_t
 		return entities.Final_timetable{} 
 	}
 
-	fmt.Println("RESP: ", result)
 	return result
 }
