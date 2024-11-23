@@ -21,7 +21,7 @@ func SearchGroupUID(bot *telego.Bot, msg telego.Message, friend *structures.Aske
 	}
 	defer file.Close()
 
-	fmt.Println("Я прочел файл")
+	// fmt.Println("Я прочел файл")
 	data, err := ioutil.ReadAll(file)
 	if err != nil {
 		fmt.Println("Ошибка при чтении файла:", err)

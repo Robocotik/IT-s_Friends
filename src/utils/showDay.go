@@ -1,7 +1,6 @@
 package utils
 
 import (
-	
 	"Friends/src/entities"
 
 	"github.com/mymmrac/telego"

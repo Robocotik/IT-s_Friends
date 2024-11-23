@@ -144,10 +144,16 @@ func DoSwitch(conn *pgx.Conn, user *structures.User, friend *structures.AskedFri
 
 	case structures.StateAskNickname:
 		friend.NickName = msg.Text
-		handle.HandleAddToHavourite(bot, msg)
 		friend_id, err := server.AddFriend(bot, msg, conn, friend)
-		if err == nil {
+		if err != nil {
+			if err.Error() == "too long" {
+				utils.WriteMessage(bot, msg, "К сожалению, имя друга превышает 40 символов, попробуй еще раз :)")
+				handle.HandleSelectNickname(bot, msg)
+				break
+			}
+		} else {
 			server.AddConnection(bot, msg, conn, msg.Chat.ChatID().ID, friend_id)
+			handle.HandleAddToHavourite(bot, msg)
 		}
 		user.State = structures.StateRedirectToStartSearch
 

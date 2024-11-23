@@ -30,11 +30,11 @@ func GetFaculties(filial string) []string {
 	faculties = []string{}
 
 	filial_index := utils.IndexOf(GetFilials(), filial)
-	fmt.Println("Я нашел индекс филлиалаааа ", filial_index)
+	// fmt.Println("Я нашел индекс филлиалаааа ", filial_index)
 
 	for _, faculty := range result.Data.Children[filial_index].Children {
 		faculties = append(faculties, faculty.Abbr)
 	}
-	fmt.Sprintf("Факультеты: ", faculties)
+	// fmt.Sprintf("Факультеты: ", faculties)
 	return faculties
 }

@@ -31,11 +31,11 @@ func GetCourses(filial string, faculty string, cathedra string) []string {
 	courses = []string{}
 
 	filial_index := utils.IndexOf(GetFilials(), filial)
-	fmt.Println("Я нашел индекс филлиалааа1 ", filial_index)
+	// fmt.Println("Я нашел индекс филлиалааа1 ", filial_index)
 	cathedra_index := utils.IndexOf(GetCathedras(filial, faculty), cathedra)
-	fmt.Println("Я нашел индекс кафедрыыыыы1 ", cathedra_index)
+	// fmt.Println("Я нашел индекс кафедрыыыыы1 ", cathedra_index)
 	faculty_index := utils.IndexOf(GetFaculties(filial), faculty)
-	fmt.Println("Я нашел индекс факультета1 ", faculty_index)
+	// fmt.Println("Я нашел индекс факультета1 ", faculty_index)
 
 	for index, course := range result.Data.Children[filial_index].Children[faculty_index].Children[cathedra_index].Children {
 		fmt.Println("КУРС: ", course.Course)
