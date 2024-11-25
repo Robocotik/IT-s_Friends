@@ -1,9 +1,9 @@
 package keyboard
 
 import (
-	"Friends/src/assets"
-	"Friends/src/components/structures"
-	"Friends/src/utils"
+	"github.com/Robocotik/IT-s_Friends/src/assets"
+	"github.com/Robocotik/IT-s_Friends/src/components/structures"
+	"github.com/Robocotik/IT-s_Friends/src/utils"
 
 	// "Friends/src/messages"
 	"github.com/jackc/pgx/v5"

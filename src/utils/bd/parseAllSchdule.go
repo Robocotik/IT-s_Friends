@@ -1,8 +1,8 @@
 package bd
 
 import (
-	"Friends/src/entities"
-	"Friends/src/utils"
+	"github.com/Robocotik/IT-s_Friends/src/entities"
+	"github.com/Robocotik/IT-s_Friends/src/utils"
 	"context"
 	"encoding/json"
 	"fmt"

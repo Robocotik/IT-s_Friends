@@ -1,7 +1,7 @@
 package server
 
 import (
-	"Friends/src/components/structures"
+	"github.com/Robocotik/IT-s_Friends/src/components/structures"
 	"context"
 
 	"github.com/jackc/pgx/v5"

@@ -1,8 +1,8 @@
 package handle
 
 import (
-	keyboard "Friends/src/components/keyboards"
-	"Friends/src/messages"
+	keyboard "github.com/Robocotik/IT-s_Friends/src/components/keyboards"
+	"github.com/Robocotik/IT-s_Friends/src/messages"
 	"fmt"
 
 	"github.com/mymmrac/telego"

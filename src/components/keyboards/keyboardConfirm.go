@@ -1,7 +1,7 @@
 package keyboard
 
 import (
-	"Friends/src/components/structures"
+	"github.com/Robocotik/IT-s_Friends/src/components/structures"
 	"fmt"
 
 	"github.com/mymmrac/telego"

@@ -3,7 +3,7 @@ package utils
 import (
 	// "Friends/src/components/structures"
 
-	"Friends/src/entities"
+	"github.com/Robocotik/IT-s_Friends/src/entities"
 	"strconv"
 
 	"github.com/mymmrac/telego"

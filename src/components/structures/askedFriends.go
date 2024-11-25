@@ -1,6 +1,6 @@
 package structures
 
-import "Friends/src/entities"
+import "github.com/Robocotik/IT-s_Friends/src/entities"
 
 type AskedFriend struct {
 	Identity Identity

@@ -1,8 +1,8 @@
 package keyboard
 
 import (
-	"Friends/src/assets"
-	"Friends/src/utils"
+	"github.com/Robocotik/IT-s_Friends/src/assets"
+	"github.com/Robocotik/IT-s_Friends/src/utils"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/mymmrac/telego"

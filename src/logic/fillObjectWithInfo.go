@@ -1,10 +1,10 @@
 package logic
 
 import (
-	"Friends/src/assets"
-	"Friends/src/components/structures"
-	handle "Friends/src/handlers"
-	"Friends/src/utils"
+	"github.com/Robocotik/IT-s_Friends/src/assets"
+	"github.com/Robocotik/IT-s_Friends/src/components/structures"
+	handle "github.com/Robocotik/IT-s_Friends/src/handlers"
+	"github.com/Robocotik/IT-s_Friends/src/utils"
 	"errors"
 	"fmt"
 

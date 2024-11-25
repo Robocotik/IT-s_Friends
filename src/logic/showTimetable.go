@@ -1,9 +1,9 @@
 package logic
 
 import (
-	keyboard "Friends/src/components/keyboards"
-	"Friends/src/entities"
-	"Friends/src/utils"
+	keyboard "github.com/Robocotik/IT-s_Friends/src/components/keyboards"
+	"github.com/Robocotik/IT-s_Friends/src/entities"
+	"github.com/Robocotik/IT-s_Friends/src/utils"
 	"github.com/mymmrac/telego"
 )
 

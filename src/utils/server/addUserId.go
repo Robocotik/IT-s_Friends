@@ -1,7 +1,7 @@
 package server
 
 import (
-	"Friends/src/utils"
+	"github.com/Robocotik/IT-s_Friends/src/utils"
 	"context"
 	"fmt"
 	"os"

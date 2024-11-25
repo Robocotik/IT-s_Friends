@@ -1,8 +1,8 @@
 package server
 
 import (
-	errorsCustom "Friends/src/components/structures/errors"
-	"Friends/src/utils"
+	errorsCustom "github.com/Robocotik/IT-s_Friends/src/components/structures/errors"
+	"github.com/Robocotik/IT-s_Friends/src/utils"
 	"context"
 	"errors"
 	"fmt"

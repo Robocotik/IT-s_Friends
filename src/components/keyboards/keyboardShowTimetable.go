@@ -1,7 +1,7 @@
 package keyboard
 
 import (
-	"Friends/src/utils"
+	"github.com/Robocotik/IT-s_Friends/src/utils"
 
 	"github.com/mymmrac/telego"
 	tu "github.com/mymmrac/telego/telegoutil"

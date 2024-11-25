@@ -1,26 +1,26 @@
 package logic
 
 import (
-	keyboard "Friends/src/components/keyboards"
-	"Friends/src/components/structures"
-	errorsCustom "Friends/src/components/structures/errors"
-	"Friends/src/handlers"
-	"Friends/src/utils"
+	keyboard "github.com/Robocotik/IT-s_Friends/src/components/keyboards"
+	"github.com/Robocotik/IT-s_Friends/src/components/structures"
+	errorsCustom "github.com/Robocotik/IT-s_Friends/src/components/structures/errors"
+	"github.com/Robocotik/IT-s_Friends/src/handlers"
+	"github.com/Robocotik/IT-s_Friends/src/utils"
 
 	// "Friends/src/utils/bd"
-	"Friends/src/utils/server"
+	"github.com/Robocotik/IT-s_Friends/src/utils/server"
 	"errors"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/mymmrac/telego"
-	"strconv"
+	// "strconv"
 )
 
 var ch_zn_selected = ""
 
 func DoSwitch(conn *pgx.Conn, user *structures.User, friend *structures.AskedFriend, bot *telego.Bot, msg telego.Message, exists bool) {
 	var err error
-	utils.WriteMessage(bot, msg, strconv.FormatBool(exists))
+	// utils.WriteMessage(bot, msg, strconv.FormatBool(exists))
 	switch user.State {
 	case structures.StateStart:
 		// bd.ParseAllSchdule(conn, bot, msg)

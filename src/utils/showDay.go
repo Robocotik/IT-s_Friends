@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"Friends/src/entities"
+	"github.com/Robocotik/IT-s_Friends/src/entities"
 
 	"github.com/mymmrac/telego"
 	"github.com/mymmrac/telego/telegoutil"

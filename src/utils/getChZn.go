@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"Friends/src/entities"
+	"github.com/Robocotik/IT-s_Friends/src/entities"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"

@@ -1,4 +1,4 @@
-module Friends
+module github.com/Robocotik/IT-s_Friends
 
 go 1.22.3
 
