@@ -71,6 +71,7 @@ func DoSwitch(conn *pgx.Conn, user *structures.User, friend *structures.AskedFri
 		FillObjectWithInfo(&user.Friend.State, conn, bot, msg, &friend.Identity)
 		if user.Friend.State  == structures.StateSearch {
 			user.State = structures.StateSearch
+			user.Friend.State = structures.StateAskFilial
 		}
 
 	case structures.StateSearch:

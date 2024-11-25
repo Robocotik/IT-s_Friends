@@ -1,12 +1,11 @@
 package logic
 
 import (
+	"errors"
 	"github.com/Robocotik/IT-s_Friends/src/assets"
 	"github.com/Robocotik/IT-s_Friends/src/components/structures"
 	handle "github.com/Robocotik/IT-s_Friends/src/handlers"
 	"github.com/Robocotik/IT-s_Friends/src/utils"
-	"errors"
-	"fmt"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/mymmrac/telego"
@@ -14,7 +13,6 @@ import (
 
 func FillObjectWithInfo(state *structures.State, conn *pgx.Conn, bot *telego.Bot, msg telego.Message, identity *structures.Identity) {
 	var err error
-	fmt.Println("ЩАС НА state: ", *state)
 	switch *state {
 	case structures.StateAskFilial:
 		filials := assets.GetFilials(conn, bot, msg)
@@ -67,6 +65,7 @@ func FillObjectWithInfo(state *structures.State, conn *pgx.Conn, bot *telego.Bot
 		*state = structures.StateConfirm
 
 	case structures.StateConfirm:
+		utils.WriteMessage(bot, msg, "ВХОДЯЩАЯ СТРОКА :"+msg.Text)
 		_, err = utils.ParseString(bot, msg, errors.New("ответ4"), []string{structures.YES, structures.NO})
 		if err != nil {
 			handle.HandleConfirm(bot, msg, identity)
