@@ -65,7 +65,6 @@ func FillObjectWithInfo(state *structures.State, conn *pgx.Conn, bot *telego.Bot
 		*state = structures.StateConfirm
 
 	case structures.StateConfirm:
-		utils.WriteMessage(bot, msg, "ВХОДЯЩАЯ СТРОКА :"+msg.Text)
 		_, err = utils.ParseString(bot, msg, errors.New("ответ4"), []string{structures.YES, structures.NO})
 		if err != nil {
 			handle.HandleConfirm(bot, msg, identity)
