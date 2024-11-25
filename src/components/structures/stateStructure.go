@@ -3,16 +3,23 @@ package structures
 const (
 	StateStart State = iota
 	StateDefault
+
+	StateAskForMe
 	StateStartMenu
-	StateAskFilial
-	StateAskFaculty
-	StateAskCathedra
-	StateAskCourse
-	StateAskGroup
-	StateConfirm
+	StateAskForFriend
+
 	StateSearch
 	StateGroupFound
 	StateAskNickname
 	StateShowTimetable
 	StateRedirectToStartSearch
+)
+
+const (
+	StateAskFilial State = iota
+	StateAskFaculty
+	StateAskCathedra
+	StateAskCourse
+	StateAskGroup
+	StateConfirm
 )

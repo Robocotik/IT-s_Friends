@@ -2,6 +2,7 @@ package server
 
 import (
 	"Friends/src/components/structures"
+	errorsCustom "Friends/src/components/structures/errors"
 	"context"
 	"errors"
 	"fmt"
@@ -19,20 +20,20 @@ func AddFriend(bot *telego.Bot, msg telego.Message, conn *pgx.Conn, friend *stru
 	err := conn.QueryRow(
 		context.Background(),
 		"SELECT friend_id FROM friends WHERE nickname = $1 AND group_id = $2",
-		friend.NickName, friend.Uuid,
+		friend.NickName, friend.Identity.Uuid,
 	).Scan(&id)
 
 	if err != nil && err == pgx.ErrNoRows {
 		err = conn.QueryRow(
 			context.Background(),
 			"INSERT INTO friends (nickname, group_id, group_title) VALUES ($1, $2, $3) RETURNING friend_id",
-			friend.NickName, friend.Uuid, friend.Group,
+			friend.NickName, friend.Identity.Uuid, friend.Identity.Group,
 		).Scan(&id)
 		if err != nil {
 			if pgErr, ok := err.(*pgconn.PgError); ok {
 				if pgErr.Code == "23514" { // Код ошибки для нарушения ограничения
 					fmt.Fprintf(os.Stderr, "Insert failed: constraint violation on name_length: %v\n", pgErr.Message)
-					return -1, errors.New("too long")
+					return -1, errors.New(errorsCustom.ErrTooLongMessage_23514)
 				}
 			}
 			fmt.Fprintf(os.Stderr, "Insert failed: %v\n", err)

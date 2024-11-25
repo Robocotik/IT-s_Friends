@@ -11,7 +11,7 @@ import (
 	"github.com/mymmrac/telego"
 )
 
-func GetGroups(conn *pgx.Conn, bot *telego.Bot, msg telego.Message, friend *structures.AskedFriend) []string {
+func GetGroups(conn *pgx.Conn, bot *telego.Bot, msg telego.Message, identity *structures.Identity) []string {
 
 	var res []string
 	var groupsTitle string
@@ -24,7 +24,7 @@ func GetGroups(conn *pgx.Conn, bot *telego.Bot, msg telego.Message, friend *stru
 	JOIN fillials fi ON s.fillial_id = fi.id
 	WHERE c.title IN ($1) 
 	  AND fi.title IN ($2);
-`, friend.Cathedra, friend.Filial)
+`, identity.Cathedra, identity.Filial)
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Query failed in getting groups: %v\n", err)

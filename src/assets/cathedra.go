@@ -11,11 +11,10 @@ import (
 	"os"
 )
 
-func GetCathedras(conn *pgx.Conn, bot *telego.Bot, msg telego.Message, friend *structures.AskedFriend) []string {
+func GetCathedras(conn *pgx.Conn, bot *telego.Bot, msg telego.Message, identity *structures.Identity) []string {
 
 	var res []string
 	var cathedraTitle string
-	fmt.Println("ВХОДНОЕ: ", friend.Filial, friend.Faculty)
 	rows, err := conn.Query(context.Background(), `
 	SELECT DISTINCT ca.title
 	FROM cathedras ca
@@ -23,7 +22,7 @@ func GetCathedras(conn *pgx.Conn, bot *telego.Bot, msg telego.Message, friend *s
 	JOIN fillials fi ON s.fillial_id = fi.id
 	JOIN faculties fa ON s.faculty_id = fa.id
 	WHERE fi.title = $1 AND fa.title = $2;
-`, friend.Filial, friend.Faculty)
+`, identity.Filial, identity.Faculty)
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Query failed in getting cathedras: %v\n", err)

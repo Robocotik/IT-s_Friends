@@ -10,8 +10,8 @@ import (
 	tu "github.com/mymmrac/telego/telegoutil"
 )
 
-func HandleSelectGroup(conn *pgx.Conn, bot *telego.Bot, msg telego.Message, friend *structures.AskedFriend) {
-	keyboard := keyboard.CreateKeyboardGroup(conn, bot, msg, friend)
+func HandleSelectGroup(conn *pgx.Conn, bot *telego.Bot, msg telego.Message, identity *structures.Identity) {
+	keyboard := keyboard.CreateKeyboardGroup(conn, bot, msg, identity)
 	_, _ = bot.SendMessage(tu.Message(
 		msg.Chat.ChatID(),
 		fmt.Sprintf("Выберите группу"),

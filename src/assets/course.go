@@ -11,7 +11,7 @@ import (
 	"github.com/mymmrac/telego"
 )
 
-func GetCourses(conn *pgx.Conn, bot *telego.Bot, msg telego.Message, friend *structures.AskedFriend) []string {
+func GetCourses(conn *pgx.Conn, bot *telego.Bot, msg telego.Message, identity *structures.Identity) []string {
 
 	var res []string
 	var coursesTitle string
@@ -23,7 +23,7 @@ func GetCourses(conn *pgx.Conn, bot *telego.Bot, msg telego.Message, friend *str
 	JOIN fillials fi ON s.fillial_id = fi.id
 	JOIN cathedras ca ON s.cathedra_id = ca.id
 	WHERE fi.title = $1 AND ca.title = $2;
-`, friend.Filial, friend.Cathedra)
+`, identity.Filial, identity.Cathedra)
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Query failed in getting courses: %v\n", err)

@@ -11,18 +11,17 @@ import (
 	"github.com/mymmrac/telego"
 )
 
-func GetFaculties(conn *pgx.Conn, bot *telego.Bot, msg telego.Message, friend *structures.AskedFriend) []string {
+func GetFaculties(conn *pgx.Conn, bot *telego.Bot, msg telego.Message, identity *structures.Identity) []string {
 
 	var res []string
 	var facultyTitle string
-	fmt.Println("ВХОДНОЕ ФИЛЛИАЛ :", friend.Filial)
 	rows, err := conn.Query(context.Background(), `
 	SELECT DISTINCT f.title
 	FROM faculties f
 	JOIN schedule s ON f.id = s.faculty_id
 	JOIN fillials fi ON s.fillial_id = fi.id
 	WHERE fi.title = $1;
-`, friend.Filial)
+`, identity.Filial)
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Query failed in getting faculties: %v\n", err)

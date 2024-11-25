@@ -9,13 +9,13 @@ import (
 	tu "github.com/mymmrac/telego/telegoutil"
 )
 
-func HandleConfirm(bot *telego.Bot, msg telego.Message, friend *structures.AskedFriend) {
+func HandleConfirm(bot *telego.Bot, msg telego.Message, identity *structures.Identity) {
 	keyboard := keyboard.CreateKeyboardConfirm()
 	_, _ = bot.SendMessage(tu.Message(
 		msg.Chat.ChatID(),
 
 		fmt.Sprintf(
 			"Выходит твой друг учится в %s на %s курсе, на %s, верно?",
-			friend.Filial, friend.Course, friend.Group),
+			identity.Filial, identity.Course, identity.Group),
 	).WithReplyMarkup(keyboard))
 }

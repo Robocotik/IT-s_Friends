@@ -23,7 +23,7 @@ func SearchGroupUID(bot *telego.Bot, msg telego.Message, conn *pgx.Conn, friend 
 		JOIN groups ON schedule.group_id = groups.id
 		WHERE groups.title = $1 AND fillials.title = $2;
 		 `,
-		friend.Group, friend.Filial,
+		friend.Identity.Group, friend.Identity.Filial,
 	).Scan(&res)
 
 	if err != nil {

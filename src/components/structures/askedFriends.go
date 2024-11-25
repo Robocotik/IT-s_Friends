@@ -3,13 +3,9 @@ package structures
 import "Friends/src/entities"
 
 type AskedFriend struct {
-	Filial   string
-	Faculty  string
-	Course   string
-	Cathedra string
-	Group    string
+	Identity Identity
 	NickName string
-	Uuid     string
+	State State
 	Request  entities.Final_timetable
 }
 

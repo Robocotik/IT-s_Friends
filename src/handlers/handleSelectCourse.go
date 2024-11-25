@@ -13,8 +13,8 @@ import (
 )
 
 
-func HandleSelectCourse(conn *pgx.Conn, bot *telego.Bot, msg telego.Message, friend *structures.AskedFriend) {
-	keyboard := keyboard.CreateKeyboardCourse(conn, bot, msg, friend)
+func HandleSelectCourse(conn *pgx.Conn, bot *telego.Bot, msg telego.Message, identity *structures.Identity) {
+	keyboard := keyboard.CreateKeyboardCourse(conn, bot, msg, identity)
 	_, _ = bot.SendMessage(tu.Message(
 		msg.Chat.ChatID(),
 		fmt.Sprintf("Выберите курс"),

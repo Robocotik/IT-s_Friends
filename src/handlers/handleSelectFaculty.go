@@ -10,8 +10,8 @@ import (
 	tu "github.com/mymmrac/telego/telegoutil"
 )
 
-func HandleSelectFaculty(conn *pgx.Conn, bot *telego.Bot, msg telego.Message, friend *structures.AskedFriend) {
-	keyboard := keyboard.CreateKeyboardFaculty(conn, bot, msg, friend)
+func HandleSelectFaculty(conn *pgx.Conn, bot *telego.Bot, msg telego.Message, identity *structures.Identity) {
+	keyboard := keyboard.CreateKeyboardFaculty(conn, bot, msg, identity)
 	_, _ = bot.SendMessage(tu.Message(
 		msg.Chat.ChatID(),
 		fmt.Sprintf("Выберите факультет"),

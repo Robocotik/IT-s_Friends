@@ -10,4 +10,5 @@ func WriteMessage(bot *telego.Bot, msg telego.Message, text string) {
 		msg.Chat.ChatID(),
 		text,
 	))
+	bot.GetMe()
 }

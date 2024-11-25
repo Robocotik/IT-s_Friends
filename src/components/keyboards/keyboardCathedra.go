@@ -12,8 +12,8 @@ import (
 	// "fmt"
 )
 
-func CreateKeyboardCathedra(conn *pgx.Conn, bot *telego.Bot, msg telego.Message, friend *structures.AskedFriend) *telego.ReplyKeyboardMarkup {
-	var cathedras = assets.GetCathedras(conn, bot, msg, friend)
+func CreateKeyboardCathedra(conn *pgx.Conn, bot *telego.Bot, msg telego.Message, identity *structures.Identity) *telego.ReplyKeyboardMarkup {
+	var cathedras = assets.GetCathedras(conn, bot, msg, identity)
 	var items_rows [][]telego.KeyboardButton = utils.GetItemsRow(cathedras)
 	return tu.Keyboard(
 		items_rows...,

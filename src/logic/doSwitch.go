@@ -1,23 +1,26 @@
 package logic
 
 import (
-	"Friends/src/assets"
 	keyboard "Friends/src/components/keyboards"
 	"Friends/src/components/structures"
+	errorsCustom "Friends/src/components/structures/errors"
 	"Friends/src/handlers"
 	"Friends/src/utils"
+
 	// "Friends/src/utils/bd"
 	"Friends/src/utils/server"
 	"errors"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/mymmrac/telego"
+	"strconv"
 )
 
 var ch_zn_selected = ""
 
-func DoSwitch(conn *pgx.Conn, user *structures.User, friend *structures.AskedFriend, bot *telego.Bot, msg telego.Message) {
+func DoSwitch(conn *pgx.Conn, user *structures.User, friend *structures.AskedFriend, bot *telego.Bot, msg telego.Message, exists bool) {
 	var err error
+	utils.WriteMessage(bot, msg, strconv.FormatBool(exists))
 	switch user.State {
 	case structures.StateStart:
 		// bd.ParseAllSchdule(conn, bot, msg)
@@ -25,24 +28,35 @@ func DoSwitch(conn *pgx.Conn, user *structures.User, friend *structures.AskedFri
 		user.State = structures.StateDefault
 
 	case structures.StateDefault:
-		_, err = utils.ParseString(bot, msg, errors.New("ответ"), []string{"Погнали"})
+		_, err = utils.ParseString(bot, msg, errors.New("ответ1"), []string{"Погнали"})
 		if err != nil {
 			handle.HandleStart(bot, msg)
 			break
 		}
-		handle.HandleMenuStart(bot, msg)
-		user.State = structures.StateStartMenu
+		if exists {
+			handle.HandleMenuStart(bot, msg)
+			user.State = structures.StateStartMenu
+		} else {
+			handle.HandleAddMe(bot, msg)
+			user.State = structures.StateAskForMe
+		}
 
+	case structures.StateAskForMe:
+		FillObjectWithInfo(&user.StateFilling, conn, bot, msg, &user.Identity)
+		if user.StateFilling == structures.StateSearch {
+			handle.HandleAskForMe(bot, msg)
+			user.State = structures.StateStartMenu
+			server.SetInfoForId(bot, msg, conn, user.Identity, msg.Chat.ID )
+		}
 	case structures.StateStartMenu:
-		server.AddUserId(bot, msg, conn, msg.Chat.ChatID().ID, msg.From.Username)
-		_, err = utils.ParseString(bot, msg, errors.New("ответ"), []string{structures.FIND_NEW_FRIENDS, structures.SHOW_FRIENDS})
+		_, err = utils.ParseString(bot, msg, errors.New("ответ2"), []string{structures.FIND_NEW_FRIENDS, structures.SHOW_FRIENDS})
 		if err != nil {
 			handle.HandleMenuStart(bot, msg)
 			break
 		}
 		if msg.Text == structures.FIND_NEW_FRIENDS {
 			handle.HandleSelectFilial(conn, bot, msg)
-			user.State = structures.StateAskFilial
+			user.State = structures.StateAskForFriend
 		} else {
 			favs, err := server.GetFriendsFromId(conn, msg.Chat.ChatID().ID)
 			utils.RiseError(bot, msg, err)
@@ -53,75 +67,15 @@ func DoSwitch(conn *pgx.Conn, user *structures.User, friend *structures.AskedFri
 
 		}
 
-	case structures.StateAskFilial:
-		filials := assets.GetFilials(conn, bot, msg)
-		friend.Filial, err = utils.ParseString(bot, msg, errors.New("филиал"), filials)
-		if err != nil {
-			handle.HandleSelectFilial(conn, bot, msg)
-			break
-		}
-		handle.HandleSelectFaculty(conn, bot, msg, friend)
-		user.State = structures.StateAskFaculty
-
-	case structures.StateAskFaculty:
-		faculties := assets.GetFaculties(conn, bot, msg, friend)
-		friend.Faculty, err = utils.ParseString(bot, msg, errors.New("факультет"), faculties)
-		if err != nil {
-			handle.HandleSelectFaculty(conn, bot, msg, friend)
-			break
-		}
-		handle.HandleSelectCathedra(conn, bot, msg, friend)
-		user.State = structures.StateAskCathedra
-
-	case structures.StateAskCathedra:
-		cathedras := assets.GetCathedras(conn, bot, msg, friend)
-		friend.Cathedra, err = utils.ParseString(bot, msg, errors.New("кафедра"), cathedras)
-		if err != nil {
-			handle.HandleSelectCathedra(conn, bot, msg, friend)
-			break
-		}
-		user.State = structures.StateAskCourse
-		handle.HandleSelectCourse(conn, bot, msg, friend)
-
-	case structures.StateAskCourse:
-		courses := assets.GetCourses(conn, bot, msg, friend)
-		friend.Course, err = utils.ParseString(bot, msg, errors.New("курс"), courses)
-		if err != nil {
-			handle.HandleSelectCourse(conn, bot, msg, friend)
-			break
-		}
-		handle.HandleSelectGroup(conn, bot, msg, friend)
-		user.State = structures.StateAskGroup
-
-	case structures.StateAskGroup:
-		var groups = assets.GetGroups(conn, bot, msg, friend)
-		friend.Group, err = utils.ParseString(bot, msg, errors.New("группа"), groups)
-		if err != nil {
-			handle.HandleSelectGroup(conn, bot, msg, friend)
-			break
-		}
-		user.State = structures.StateConfirm
-		handle.HandleConfirm(bot, msg, friend)
-
-	case structures.StateConfirm:
-		_, err = utils.ParseString(bot, msg, errors.New("ответ"), []string{structures.YES, structures.NO})
-		if err != nil {
-			handle.HandleConfirm(bot, msg, friend)
-			break
-		}
-		if msg.Text == structures.YES {
-			handle.HandleThankForData(bot, msg)
+	case structures.StateAskForFriend:
+		FillObjectWithInfo(&user.Friend.State, conn, bot, msg, &friend.Identity)
+		if user.Friend.State  == structures.StateSearch {
 			user.State = structures.StateSearch
-
-		} else {
-			handle.HandleSelectFilial(conn, bot, msg)
-			user.State = structures.StateAskFilial
 		}
 
 	case structures.StateSearch:
-
-		friend.Uuid = SearchGroupUID(bot, msg, conn, friend)
-		friend.Request = DoRequest(bot, msg, friend.Uuid)
+		friend.Identity.Uuid = SearchGroupUID(bot, msg, conn, friend)
+		friend.Request = DoRequest(bot, msg, friend.Identity.Uuid)
 		if len(friend.Request.Data.Schedule) != 0 { // проверка на наличие расписания
 			handle.HandleGroupFound(bot, msg)
 			user.State = structures.StateGroupFound
@@ -131,9 +85,9 @@ func DoSwitch(conn *pgx.Conn, user *structures.User, friend *structures.AskedFri
 		}
 
 	case structures.StateGroupFound: // Группа была найдена
-		_, err = utils.ParseString(bot, msg, errors.New("ответ"), []string{structures.ADD_TO_FAVOURITE, structures.SHOW_SCHEDULE})
+		_, err = utils.ParseString(bot, msg, errors.New("ответ3"), []string{structures.ADD_TO_FAVOURITE, structures.SHOW_SCHEDULE})
 		if err != nil {
-			handle.HandleConfirm(bot, msg, friend)
+			handle.HandleConfirm(bot, msg, &friend.Identity)
 			break
 		}
 		if msg.Text == structures.ADD_TO_FAVOURITE {
@@ -148,8 +102,8 @@ func DoSwitch(conn *pgx.Conn, user *structures.User, friend *structures.AskedFri
 		friend.NickName = msg.Text
 		friend_id, err := server.AddFriend(bot, msg, conn, friend)
 		if err != nil {
-			if err.Error() == "too long" {
-				utils.WriteMessage(bot, msg, "К сожалению, имя друга превышает 40 символов, попробуй еще раз :)")
+			if err.Error() == errorsCustom.ErrTooLongMessage_23514 {
+				utils.WriteMessage(bot, msg, errorsCustom.ErrTooLongMessage_23514)
 				handle.HandleSelectNickname(bot, msg)
 				break
 			}
