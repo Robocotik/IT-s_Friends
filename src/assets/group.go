@@ -1,42 +1,55 @@
 package assets
 
 import (
-	"Friends/src/entities"
+	"Friends/src/components/structures"
 	"Friends/src/utils"
-	"encoding/json"
+	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
+
+	"github.com/jackc/pgx/v5"
+	"github.com/mymmrac/telego"
 )
 
-func GetGroups(filial string, course string, faculty string, cathedra string) []string {
-	var groups []string
-	file, err := os.Open("D:/study/BMSTU/paradigms_structures_of_pl/IT-s_Friends/src/assets/db/structure.json")
+func GetGroups(conn *pgx.Conn, bot *telego.Bot, msg telego.Message, friend *structures.AskedFriend) []string {
+
+	var res []string
+	var groupsTitle string
+
+	rows, err := conn.Query(context.Background(), `
+	SELECT g.title
+	FROM groups g
+	JOIN schedule s ON g.id = s.group_id
+	JOIN cathedras c ON s.cathedra_id = c.id
+	JOIN fillials fi ON s.fillial_id = fi.id
+	WHERE c.title IN ($1) 
+	  AND fi.title IN ($2);
+`, friend.Cathedra, friend.Filial)
+
 	if err != nil {
-		fmt.Println("Ошибка при открытии файла:", err)
-		return nil
+		fmt.Fprintf(os.Stderr, "Query failed in getting groups: %v\n", err)
+		utils.RiseError(bot, msg, err)
+		return []string{""}
 	}
-	defer file.Close()
+	defer rows.Close()
 
-	data, err := ioutil.ReadAll(file)
-	if err != nil {
-		fmt.Println("Ошибка при чтении файла:", err)
-		return nil
-	}
-
-	filial_index := utils.IndexOf(GetFilials(), filial)
-	cathedra_index := utils.IndexOf(GetCathedras(filial, faculty), cathedra)
-	faculty_index := utils.IndexOf(GetFaculties(filial), faculty)
-	course_index := utils.IndexOf(GetCourses(filial, faculty, cathedra), course)
-
-	var result entities.Final
-	_ = json.Unmarshal(data, &result)
-	groups = []string{}
-
-	for _, group := range result.Data.Children[filial_index].Children[faculty_index].Children[cathedra_index].Children[course_index].Children {
-		groups = append(groups, group.Abbr)
+	for rows.Next() {
+		err := rows.Scan(&groupsTitle)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to scan group title: %v\n", err)
+			utils.RiseError(bot, msg, err)
+			return []string{""}
+		}
+		res = append(res, groupsTitle)
 	}
 
-	fmt.Sprintf("ГРУППЫ: ", groups)
-	return groups
+	if err := rows.Err(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error occurred during row iteration: %v\n", err)
+		utils.RiseError(bot, msg, err)
+		return []string{""}
+	}
+
+	fmt.Println("I FOUND FILIALS: ", res)
+	return res
+
 }

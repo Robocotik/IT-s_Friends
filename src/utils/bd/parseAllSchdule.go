@@ -2,6 +2,7 @@ package bd
 
 import (
 	"Friends/src/entities"
+	"Friends/src/utils"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -10,10 +11,13 @@ import (
 	"os"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/mymmrac/telego"
 )
 
-func ParseAllSchdule(conn *pgx.Conn) error {
+func ParseAllSchdule(conn *pgx.Conn, bot *telego.Bot, msg telego.Message) error {
 	resp, err := http.Get("https://lks.bmstu.ru/lks-back/api/v1/structure")
+	var group_id, cathedra_id, faculty_id, fillial_id, course_id int64
+
 	if err != nil {
 		fmt.Println("Ошибка при get запросе :", err)
 		return err
@@ -26,22 +30,83 @@ func ParseAllSchdule(conn *pgx.Conn) error {
 	}
 	var result entities.Final
 	err = json.Unmarshal(data, &result)
-	// fmt.Println("result +", result)
 	for _, filial := range result.Data.Children {
-		// fmt.Println("я нашел филлиал", filial.Abbr)
+		err := conn.QueryRow(context.Background(),
+			`
+    WITH ins AS (
+        INSERT INTO fillials (title) VALUES($1)
+        ON CONFLICT (title) DO NOTHING
+        RETURNING id
+    )
+    SELECT COALESCE((SELECT id FROM ins), (SELECT id FROM fillials WHERE title = $1));
+    `,
+			filial.Abbr).Scan(&fillial_id)
+		if err != nil {
+			utils.RiseError(bot, msg, err)
+		}
+
 		for _, faculty := range filial.Children {
-			// fmt.Println("я нашел факультет", filial.Abbr)
+			err := conn.QueryRow(context.Background(),
+				`
+    WITH ins AS (
+        INSERT INTO faculties (title) VALUES($1)
+        ON CONFLICT (title) DO NOTHING
+        RETURNING id
+    )
+    SELECT COALESCE((SELECT id FROM ins), (SELECT id FROM faculties WHERE title = $1));
+    `,
+				faculty.Abbr).Scan(&faculty_id)
+			if err != nil {
+				utils.RiseError(bot, msg, err)
+			}
 			for _, cathedra := range faculty.Children {
-				// fmt.Println("я нашел кафедру", cathedra.Abbr)
+				err := conn.QueryRow(context.Background(),
+					`
+    WITH ins AS (
+        INSERT INTO cathedras (title) VALUES($1)
+        ON CONFLICT (title) DO NOTHING
+        RETURNING id
+    )
+    SELECT COALESCE((SELECT id FROM ins), (SELECT id FROM cathedras WHERE title = $1));
+    `,
+					cathedra.Abbr).Scan(&cathedra_id)
+				if err != nil {
+					utils.RiseError(bot, msg, err)
+				}
 				for _, course := range cathedra.Children {
-					// fmt.Println("я нашел курс", course.Abbr)
+					err := conn.QueryRow(context.Background(),
+						`
+    WITH ins AS (
+        INSERT INTO courses (title) VALUES($1)
+        ON CONFLICT (title) DO NOTHING
+        RETURNING id
+    )
+    SELECT COALESCE((SELECT id FROM ins), (SELECT id FROM courses WHERE title = $1));
+    `,
+						course.Abbr).Scan(&course_id)
+					if err != nil {
+						utils.RiseError(bot, msg, err)
+					}
 					for _, group := range course.Children {
-						// fmt.Println("я нашел группу", group.Abbr)
-						_, err := conn.Exec(context.Background(),
-							"INSERT INTO schedule (uuid, filial_title, faculty_title, course_title, cathedra_title, group_title) VALUES($1, $2, $3, $4, $5, $6) on conflict (uuid) do nothing",
-							group.Uuid, filial.Abbr, faculty.Abbr, course.Abbr, cathedra.Abbr, group.Abbr)
+						err := conn.QueryRow(context.Background(),
+							`
+    WITH ins AS (
+        INSERT INTO groups (title) VALUES($1)
+        ON CONFLICT (title) DO NOTHING
+        RETURNING id
+    )
+    SELECT COALESCE((SELECT id FROM ins), (SELECT id FROM groups WHERE title = $1));
+    `,
+							group.Abbr).Scan(&group_id)
+						if err != nil {
+							utils.RiseError(bot, msg, err)
+						}
+						_, err = conn.Exec(context.Background(),
+							"INSERT INTO schedule (uuid, course_id, fillial_id, faculty_id, cathedra_id, group_id) VALUES($1, $2, $3, $4, $5, $6) on conflict (uuid) do nothing",
+							group.Uuid, course_id, fillial_id, faculty_id, cathedra_id, group_id)
 						if err != nil {
 							fmt.Fprintf(os.Stderr, "Query failed: %v\n", err)
+							utils.RiseError(bot, msg, err)
 							return err
 						}
 

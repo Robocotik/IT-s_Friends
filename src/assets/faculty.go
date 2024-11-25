@@ -1,40 +1,52 @@
 package assets
 
 import (
-	"Friends/src/entities"
+	"Friends/src/components/structures"
 	"Friends/src/utils"
-	"encoding/json"
+	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
+
+	"github.com/jackc/pgx/v5"
+	"github.com/mymmrac/telego"
 )
 
+func GetFaculties(conn *pgx.Conn, bot *telego.Bot, msg telego.Message, friend *structures.AskedFriend) []string {
 
-func GetFaculties(filial string) []string {
-	var faculties []string
-	file, err := os.Open("D:/study/BMSTU/paradigms_structures_of_pl/IT-s_Friends/src/assets/db/structure.json")
+	var res []string
+	var facultyTitle string
+	fmt.Println("ВХОДНОЕ ФИЛЛИАЛ :", friend.Filial)
+	rows, err := conn.Query(context.Background(), `
+	SELECT DISTINCT f.title
+	FROM faculties f
+	JOIN schedule s ON f.id = s.faculty_id
+	JOIN fillials fi ON s.fillial_id = fi.id
+	WHERE fi.title = $1;
+`, friend.Filial)
+
 	if err != nil {
-		fmt.Println("Ошибка при открытии файла:", err)
-		return nil
+		fmt.Fprintf(os.Stderr, "Query failed in getting faculties: %v\n", err)
+		utils.RiseError(bot, msg, err)
+		return []string{""}
 	}
-	defer file.Close()
+	defer rows.Close()
 
-	data, err := ioutil.ReadAll(file)
-	if err != nil {
-		fmt.Println("Ошибка при чтении файла:", err)
-		return nil
+	for rows.Next() {
+		err := rows.Scan(&facultyTitle)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to scan faculty title: %v\n", err)
+			utils.RiseError(bot, msg, err)
+			return []string{""}
+		}
+		res = append(res, facultyTitle)
 	}
 
-	var result entities.Final
-	_ = json.Unmarshal(data, &result)
-	faculties = []string{}
-
-	filial_index := utils.IndexOf(GetFilials(), filial)
-	// fmt.Println("Я нашел индекс филлиалаааа ", filial_index)
-
-	for _, faculty := range result.Data.Children[filial_index].Children {
-		faculties = append(faculties, faculty.Abbr)
+	if err := rows.Err(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error occurred during row iteration: %v\n", err)
+		utils.RiseError(bot, msg, err)
+		return []string{""}
 	}
-	// fmt.Sprintf("Факультеты: ", faculties)
-	return faculties
+
+	fmt.Println("I FOUND FACULTIES: ", res)
+	return res
 }

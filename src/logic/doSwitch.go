@@ -6,6 +6,7 @@ import (
 	"Friends/src/components/structures"
 	"Friends/src/handlers"
 	"Friends/src/utils"
+	// "Friends/src/utils/bd"
 	"Friends/src/utils/server"
 	"errors"
 
@@ -19,6 +20,7 @@ func DoSwitch(conn *pgx.Conn, user *structures.User, friend *structures.AskedFri
 	var err error
 	switch user.State {
 	case structures.StateStart:
+		// bd.ParseAllSchdule(conn, bot, msg)
 		handle.HandleStart(bot, msg)
 		user.State = structures.StateDefault
 
@@ -39,7 +41,7 @@ func DoSwitch(conn *pgx.Conn, user *structures.User, friend *structures.AskedFri
 			break
 		}
 		if msg.Text == structures.FIND_NEW_FRIENDS {
-			handle.HandleSelectFilial(bot, msg)
+			handle.HandleSelectFilial(conn, bot, msg)
 			user.State = structures.StateAskFilial
 		} else {
 			favs, err := server.GetFriendsFromId(conn, msg.Chat.ChatID().ID)
@@ -52,50 +54,50 @@ func DoSwitch(conn *pgx.Conn, user *structures.User, friend *structures.AskedFri
 		}
 
 	case structures.StateAskFilial:
-		filials := assets.GetFilials()
+		filials := assets.GetFilials(conn, bot, msg)
 		friend.Filial, err = utils.ParseString(bot, msg, errors.New("филиал"), filials)
 		if err != nil {
-			handle.HandleSelectFilial(bot, msg)
+			handle.HandleSelectFilial(conn, bot, msg)
 			break
 		}
-		handle.HandleSelectFaculty(bot, msg, friend)
+		handle.HandleSelectFaculty(conn, bot, msg, friend)
 		user.State = structures.StateAskFaculty
 
 	case structures.StateAskFaculty:
-		faculties := assets.GetFaculties(friend.Filial)
+		faculties := assets.GetFaculties(conn, bot, msg, friend)
 		friend.Faculty, err = utils.ParseString(bot, msg, errors.New("факультет"), faculties)
 		if err != nil {
-			handle.HandleSelectFaculty(bot, msg, friend)
+			handle.HandleSelectFaculty(conn, bot, msg, friend)
 			break
 		}
-		handle.HandleSelectCathedra(bot, msg, friend)
+		handle.HandleSelectCathedra(conn, bot, msg, friend)
 		user.State = structures.StateAskCathedra
 
 	case structures.StateAskCathedra:
-		cathedras := assets.GetCathedras(friend.Filial, friend.Faculty)
+		cathedras := assets.GetCathedras(conn, bot, msg, friend)
 		friend.Cathedra, err = utils.ParseString(bot, msg, errors.New("кафедра"), cathedras)
 		if err != nil {
-			handle.HandleSelectCathedra(bot, msg, friend)
+			handle.HandleSelectCathedra(conn, bot, msg, friend)
 			break
 		}
 		user.State = structures.StateAskCourse
-		handle.HandleSelectCourse(bot, msg, friend)
+		handle.HandleSelectCourse(conn, bot, msg, friend)
 
 	case structures.StateAskCourse:
-		courses := assets.GetCourses(friend.Filial, friend.Faculty, friend.Cathedra)
+		courses := assets.GetCourses(conn, bot, msg, friend)
 		friend.Course, err = utils.ParseString(bot, msg, errors.New("курс"), courses)
 		if err != nil {
-			handle.HandleSelectCourse(bot, msg, friend)
+			handle.HandleSelectCourse(conn, bot, msg, friend)
 			break
 		}
-		handle.HandleSelectGroup(bot, msg, friend)
+		handle.HandleSelectGroup(conn, bot, msg, friend)
 		user.State = structures.StateAskGroup
 
 	case structures.StateAskGroup:
-		var groups = assets.GetGroups(friend.Filial, friend.Course, friend.Faculty, friend.Cathedra)
+		var groups = assets.GetGroups(conn, bot, msg, friend)
 		friend.Group, err = utils.ParseString(bot, msg, errors.New("группа"), groups)
 		if err != nil {
-			handle.HandleSelectGroup(bot, msg, friend)
+			handle.HandleSelectGroup(conn, bot, msg, friend)
 			break
 		}
 		user.State = structures.StateConfirm
@@ -112,13 +114,13 @@ func DoSwitch(conn *pgx.Conn, user *structures.User, friend *structures.AskedFri
 			user.State = structures.StateSearch
 
 		} else {
-			handle.HandleSelectFilial(bot, msg)
+			handle.HandleSelectFilial(conn, bot, msg)
 			user.State = structures.StateAskFilial
 		}
 
 	case structures.StateSearch:
 
-		friend.Uuid= SearchGroupUID(bot, msg, conn, friend)
+		friend.Uuid = SearchGroupUID(bot, msg, conn, friend)
 		friend.Request = DoRequest(bot, msg, friend.Uuid)
 		if len(friend.Request.Data.Schedule) != 0 { // проверка на наличие расписания
 			handle.HandleGroupFound(bot, msg)

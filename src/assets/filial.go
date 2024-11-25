@@ -1,34 +1,46 @@
 package assets
 
 import (
-	"Friends/src/entities"
-	"encoding/json"
+	"Friends/src/utils"
+	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
+
+	"github.com/jackc/pgx/v5"
+	"github.com/mymmrac/telego"
 )
 
-func GetFilials() []string {
-	var filials []string
-	file, err := os.Open("D:/study/BMSTU/paradigms_structures_of_pl/IT-s_Friends/src/assets/db/structure.json")
-	if err != nil {
-		fmt.Println("Ошибка при открытии файла:", err)
-		return nil
-	}
-	defer file.Close()
+func GetFilials(conn *pgx.Conn, bot *telego.Bot, msg telego.Message) []string {
+	var res []string
+	var filialTitle string
 
-	data, err := ioutil.ReadAll(file)
+	rows, err := conn.Query(
+		context.Background(),
+		"SELECT title FROM fillials",
+	)
 	if err != nil {
-		fmt.Println("Ошибка при чтении файла:", err)
-		return nil
+		fmt.Fprintf(os.Stderr, "Query failed in getting filials: %v\n", err)
+		utils.RiseError(bot, msg, err)
+		return []string{""}
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		err := rows.Scan(&filialTitle)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to scan filial title: %v\n", err)
+			utils.RiseError(bot, msg, err)
+			return []string{""}
+		}
+		res = append(res, filialTitle)
 	}
 
-	var result entities.Final
-	_ = json.Unmarshal(data, &result)
-	filials = []string{}
-	for _, filial := range result.Data.Children {
-		filials = append(filials, filial.Abbr)
+	if err := rows.Err(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error occurred during row iteration: %v\n", err)
+		utils.RiseError(bot, msg, err)
+		return []string{""}
 	}
-	fmt.Sprintf("ФИЛЛИАЛЫ: ", filials)
-	return filials
+
+	fmt.Println("I FOUND FILIALS: ", res)
+	return res
 }

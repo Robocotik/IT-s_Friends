@@ -17,12 +17,17 @@ func SearchGroupUID(bot *telego.Bot, msg telego.Message, conn *pgx.Conn, friend 
 	// Исправлено: добавлена корректная SQL команда
 	err := conn.QueryRow(
 		context.Background(),
-		"SELECT uuid FROM schedule WHERE group_title = $1 AND filial_title = $2",
+		`
+		SELECT uuid FROM schedule
+		JOIN fillials ON schedule.fillial_id = fillials.id
+		JOIN groups ON schedule.group_id = groups.id
+		WHERE groups.title = $1 AND fillials.title = $2;
+		 `,
 		friend.Group, friend.Filial,
 	).Scan(&res)
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "QueryRow failed in connection: %v\n", err)
+		fmt.Fprintf(os.Stderr, "QueryRow failed in getting group uid: %v\n", err)
 		utils.RiseError(bot, msg, err)
 		return ""
 	}

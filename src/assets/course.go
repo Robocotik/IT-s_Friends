@@ -1,46 +1,54 @@
 package assets
 
 import (
-	"Friends/src/assets/emoji"
-	"Friends/src/entities"
+	"Friends/src/components/structures"
 	"Friends/src/utils"
-	"encoding/json"
+	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
-	"strconv"
+
+	"github.com/jackc/pgx/v5"
+	"github.com/mymmrac/telego"
 )
 
-func GetCourses(filial string, faculty string, cathedra string) []string {
-	var courses []string
-	file, err := os.Open("D:/study/BMSTU/paradigms_structures_of_pl/IT-s_Friends/src/assets/db/structure.json")
+func GetCourses(conn *pgx.Conn, bot *telego.Bot, msg telego.Message, friend *structures.AskedFriend) []string {
+
+	var res []string
+	var coursesTitle string
+
+	rows, err := conn.Query(context.Background(), `
+	SELECT DISTINCT c.title
+	FROM courses c
+	JOIN schedule s ON c.id = s.course_id
+	JOIN fillials fi ON s.fillial_id = fi.id
+	JOIN cathedras ca ON s.cathedra_id = ca.id
+	WHERE fi.title = $1 AND ca.title = $2;
+`, friend.Filial, friend.Cathedra)
+
 	if err != nil {
-		fmt.Println("Ошибка при открытии файла:", err)
-		return nil
+		fmt.Fprintf(os.Stderr, "Query failed in getting courses: %v\n", err)
+		utils.RiseError(bot, msg, err)
+		return []string{""}
 	}
-	defer file.Close()
+	defer rows.Close()
 
-	data, err := ioutil.ReadAll(file)
-	if err != nil {
-		fmt.Println("Ошибка при чтении файла:", err)
-		return nil
+	for rows.Next() {
+		err := rows.Scan(&coursesTitle)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to scan course title: %v\n", err)
+			utils.RiseError(bot, msg, err)
+			return []string{""}
+		}
+		res = append(res, coursesTitle)
 	}
 
-	var result entities.Final
-	_ = json.Unmarshal(data, &result)
-	courses = []string{}
-
-	filial_index := utils.IndexOf(GetFilials(), filial)
-	// fmt.Println("Я нашел индекс филлиалааа1 ", filial_index)
-	cathedra_index := utils.IndexOf(GetCathedras(filial, faculty), cathedra)
-	// fmt.Println("Я нашел индекс кафедрыыыыы1 ", cathedra_index)
-	faculty_index := utils.IndexOf(GetFaculties(filial), faculty)
-	// fmt.Println("Я нашел индекс факультета1 ", faculty_index)
-
-	for index, course := range result.Data.Children[filial_index].Children[faculty_index].Children[cathedra_index].Children {
-		fmt.Println("КУРС: ", course.Course)
-		courses = append(courses, strconv.Itoa(course.Course)+emoji.Courses[index])
+	if err := rows.Err(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error occurred during row iteration: %v\n", err)
+		utils.RiseError(bot, msg, err)
+		return []string{""}
 	}
-	fmt.Println("КУРСЫ: ", courses)
-	return courses
+
+	fmt.Println("I FOUND COURSES: ", res)
+	return res
+
 }

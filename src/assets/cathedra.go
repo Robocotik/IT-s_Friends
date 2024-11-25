@@ -1,45 +1,54 @@
 package assets
 
 import (
-	"Friends/src/entities"
+	"Friends/src/components/structures"
 	"Friends/src/utils"
+	"context"
 
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"github.com/jackc/pgx/v5"
+	"github.com/mymmrac/telego"
 	"os"
 )
 
-func GetCathedras(filial string, faculty string) []string {
-	var cathedras []string
-	file, err := os.Open("D:/study/BMSTU/paradigms_structures_of_pl/IT-s_Friends/src/assets/db/structure.json")
+func GetCathedras(conn *pgx.Conn, bot *telego.Bot, msg telego.Message, friend *structures.AskedFriend) []string {
+
+	var res []string
+	var cathedraTitle string
+	fmt.Println("ВХОДНОЕ: ", friend.Filial, friend.Faculty)
+	rows, err := conn.Query(context.Background(), `
+	SELECT DISTINCT ca.title
+	FROM cathedras ca
+	JOIN schedule s ON ca.id = s.cathedra_id
+	JOIN fillials fi ON s.fillial_id = fi.id
+	JOIN faculties fa ON s.faculty_id = fa.id
+	WHERE fi.title = $1 AND fa.title = $2;
+`, friend.Filial, friend.Faculty)
+
 	if err != nil {
-		fmt.Println("Ошибка при открытии файла:", err)
-		return nil
+		fmt.Fprintf(os.Stderr, "Query failed in getting cathedras: %v\n", err)
+		utils.RiseError(bot, msg, err)
+		return []string{""}
 	}
-	defer file.Close()
+	defer rows.Close()
 
-	data, err := ioutil.ReadAll(file)
-	if err != nil {
-		fmt.Println("Ошибка при чтении файла:", err)
-		return nil
+	for rows.Next() {
+		err := rows.Scan(&cathedraTitle)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to scan cathedra title: %v\n", err)
+			utils.RiseError(bot, msg, err)
+			return []string{""}
+		}
+		res = append(res, cathedraTitle)
 	}
 
-	var result entities.Final
-	_ = json.Unmarshal(data, &result)
-	cathedras = []string{}
-
-	filial_index := utils.IndexOf(GetFilials(), filial)
-
-	fmt.Println("Я нашел индекс филлиалаа ", filial_index)
-
-	faculty_index := utils.IndexOf(GetFaculties(filial), faculty)
-
-	fmt.Println("Я нашел индекс факультета ", faculty_index)
-
-	for _, cathedra := range result.Data.Children[filial_index].Children[faculty_index].Children {
-		cathedras = append(cathedras, cathedra.Abbr)
+	if err := rows.Err(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error occurred during row iteration: %v\n", err)
+		utils.RiseError(bot, msg, err)
+		return []string{""}
 	}
-	fmt.Sprintf("Кафедры: ", cathedras)
-	return cathedras
+
+	fmt.Println("I FOUND CATHEDRAS: ", res)
+	return res
+
 }
