@@ -5,6 +5,7 @@ const (
 	StateDefault
 
 	StateAskForMe
+	UserNotExists
 	StateStartMenu
 	StateAskForFriend
 

@@ -11,7 +11,7 @@ import (
 	"github.com/mymmrac/telego"
 )
 
-func FillObjectWithInfo(state *structures.State, conn *pgx.Conn, bot *telego.Bot, msg telego.Message, identity *structures.Identity) {
+func FillObjectWithInfo(state *structures.State, conn *pgx.Conn, bot *telego.Bot, msg telego.Message, identity *structures.Identity, isMe bool) {
 	var err error
 	switch *state {
 	case structures.StateAskFilial:
@@ -61,17 +61,18 @@ func FillObjectWithInfo(state *structures.State, conn *pgx.Conn, bot *telego.Bot
 			handle.HandleSelectGroup(conn, bot, msg, identity)
 			break
 		}
-		handle.HandleConfirm(bot, msg, identity)
+		handle.HandleConfirm(bot, msg, identity, isMe)
 		*state = structures.StateConfirm
 
 	case structures.StateConfirm:
-		_, err = utils.ParseString(bot, msg, errors.New("ответ4"), []string{structures.YES, structures.NO})
+		_, err = utils.ParseString(bot, msg, errors.New("ответ"), []string{structures.YES, structures.NO})
 		if err != nil {
-			handle.HandleConfirm(bot, msg, identity)
+			handle.HandleConfirm(bot, msg, identity, isMe)
 			break
 		}
 		if msg.Text == structures.YES {
 			handle.HandleThankForData(bot, msg)
+			identity.Uuid = SearchGroupUID(bot, msg, conn, identity);
 			*state = structures.StateSearch
 
 		} else {

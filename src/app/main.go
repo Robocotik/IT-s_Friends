@@ -1,12 +1,12 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"github.com/Robocotik/IT-s_Friends/src/components/structures"
 	"github.com/Robocotik/IT-s_Friends/src/logic"
 	"github.com/Robocotik/IT-s_Friends/src/notify"
 	"github.com/Robocotik/IT-s_Friends/src/utils/server"
-	"context"
-	"fmt"
 	"log"
 	"os"
 	"sync"
@@ -24,9 +24,12 @@ func init() {
 	}
 }
 
+var (
+	sessions      = make(map[int64]*structures.User)
+	sessionsMutex sync.Mutex
+)
+
 func main() {
-	var UserSessions = make(map[int64]*structures.User) // Используйте int64 для ID пользователя
-	var mu sync.Mutex                                   // Мьютекс для синхронизации доступа к UserSessions
 	botToken := os.Getenv("TOKEN")
 	bot, err := telego.NewBot(botToken)
 	botUser, _ := bot.GetMe()
@@ -34,7 +37,7 @@ func main() {
 	conn, err := server.InitBD()
 	defer conn.Close(context.Background())
 	bh, _ := th.NewBotHandler(bot, updates)
-	go notify.CronMain(conn, bot, botUser.ID )
+	go notify.CronMain(conn, bot, botUser.ID)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -46,23 +49,25 @@ func main() {
 	defer bot.StopLongPolling()
 
 	bh.HandleMessage(func(bot *telego.Bot, msg telego.Message) {
-		mu.Lock() // Блокируем доступ к UserSessions
-		defer mu.Unlock()
-
 		userID := msg.From.ID
-		// Проверяем, есть ли уже сессия для этого пользователя
-		user, exists := UserSessions[userID]
+
+		// Блокируем доступ к UserSessions только для получения или создания сессии
+		sessionsMutex.Lock()
+		user, exists := sessions[userID]
 		if !exists {
-			// Если сессии нет, создаем новую
 			user = &structures.User{
 				Id:    userID,
 				State: structures.StateStart,
-				// Заполните другие поля структуры, если необходимо
+				Exists: false,
 			}
-			UserSessions[userID] = user
+			sessions[userID] = user
 			server.AddUserId(bot, msg, conn, msg.Chat.ChatID().ID, msg.From.Username)
 		}
-		logic.DoSwitch(conn, UserSessions[userID], &UserSessions[userID].Friend, bot, msg, exists)
+		sessionsMutex.Unlock()
+
+		go func() {
+			logic.DoSwitch(conn, user, &user.Friend, bot, msg)
+		}()
 	})
 	bh.Start()
 }

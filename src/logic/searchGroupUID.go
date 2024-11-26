@@ -11,7 +11,7 @@ import (
 	"github.com/mymmrac/telego"
 )
 
-func SearchGroupUID(bot *telego.Bot, msg telego.Message, conn *pgx.Conn, friend *structures.AskedFriend) string {
+func SearchGroupUID(bot *telego.Bot, msg telego.Message, conn *pgx.Conn, identity *structures.Identity) string {
 	var res string
 
 	// Исправлено: добавлена корректная SQL команда
@@ -23,7 +23,7 @@ func SearchGroupUID(bot *telego.Bot, msg telego.Message, conn *pgx.Conn, friend 
 		JOIN groups ON schedule.group_id = groups.id
 		WHERE groups.title = $1 AND fillials.title = $2;
 		 `,
-		friend.Identity.Group, friend.Identity.Filial,
+		identity.Group, identity.Filial,
 	).Scan(&res)
 
 	if err != nil {

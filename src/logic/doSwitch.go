@@ -8,8 +8,8 @@ import (
 	"github.com/Robocotik/IT-s_Friends/src/utils"
 
 	// "Friends/src/utils/bd"
-	"github.com/Robocotik/IT-s_Friends/src/utils/server"
 	"errors"
+	"github.com/Robocotik/IT-s_Friends/src/utils/server"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/mymmrac/telego"
@@ -18,7 +18,7 @@ import (
 
 var ch_zn_selected = ""
 
-func DoSwitch(conn *pgx.Conn, user *structures.User, friend *structures.AskedFriend, bot *telego.Bot, msg telego.Message, exists bool) {
+func DoSwitch(conn *pgx.Conn, user *structures.User, friend *structures.AskedFriend, bot *telego.Bot, msg telego.Message) {
 	var err error
 	// utils.WriteMessage(bot, msg, strconv.FormatBool(exists))
 	switch user.State {
@@ -28,28 +28,32 @@ func DoSwitch(conn *pgx.Conn, user *structures.User, friend *structures.AskedFri
 		user.State = structures.StateDefault
 
 	case structures.StateDefault:
-		_, err = utils.ParseString(bot, msg, errors.New("ответ1"), []string{"Погнали"})
+		_, err = utils.ParseString(bot, msg, errors.New("ответ"), []string{"Погнали"})
 		if err != nil {
 			handle.HandleStart(bot, msg)
 			break
 		}
-		if exists {
+		if user.Exists {
 			handle.HandleMenuStart(bot, msg)
 			user.State = structures.StateStartMenu
 		} else {
 			handle.HandleAddMe(bot, msg)
-			user.State = structures.StateAskForMe
+			user.State = structures.UserNotExists
 		}
+	case structures.UserNotExists:
+		handle.HandleSelectFilial(conn, bot, msg)
+		user.State = structures.StateAskForMe
 
 	case structures.StateAskForMe:
-		FillObjectWithInfo(&user.StateFilling, conn, bot, msg, &user.Identity)
+		FillObjectWithInfo(&user.StateFilling, conn, bot, msg, &user.Identity, true)
 		if user.StateFilling == structures.StateSearch {
-			handle.HandleAskForMe(bot, msg)
+			handle.HandleMenuStart(bot, msg)
 			user.State = structures.StateStartMenu
-			server.SetInfoForId(bot, msg, conn, user.Identity, msg.Chat.ID )
+			user.Exists = true
+			server.SetInfoForId(bot, msg, conn, user.Identity, msg.Chat.ID)
 		}
 	case structures.StateStartMenu:
-		_, err = utils.ParseString(bot, msg, errors.New("ответ2"), []string{structures.FIND_NEW_FRIENDS, structures.SHOW_FRIENDS})
+		_, err = utils.ParseString(bot, msg, errors.New("ответ"), []string{structures.FIND_NEW_FRIENDS, structures.SHOW_FRIENDS})
 		if err != nil {
 			handle.HandleMenuStart(bot, msg)
 			break
@@ -68,14 +72,14 @@ func DoSwitch(conn *pgx.Conn, user *structures.User, friend *structures.AskedFri
 		}
 
 	case structures.StateAskForFriend:
-		FillObjectWithInfo(&user.Friend.State, conn, bot, msg, &friend.Identity)
-		if user.Friend.State  == structures.StateSearch {
+		FillObjectWithInfo(&user.Friend.State, conn, bot, msg, &friend.Identity, false)
+		if user.Friend.State == structures.StateSearch {
 			user.State = structures.StateSearch
 			user.Friend.State = structures.StateAskFilial
 		}
 
 	case structures.StateSearch:
-		friend.Identity.Uuid = SearchGroupUID(bot, msg, conn, friend)
+		friend.Identity.Uuid = SearchGroupUID(bot, msg, conn, &friend.Identity)
 		friend.Request = DoRequest(bot, msg, friend.Identity.Uuid)
 		if len(friend.Request.Data.Schedule) != 0 { // проверка на наличие расписания
 			handle.HandleGroupFound(bot, msg)
@@ -86,9 +90,9 @@ func DoSwitch(conn *pgx.Conn, user *structures.User, friend *structures.AskedFri
 		}
 
 	case structures.StateGroupFound: // Группа была найдена
-		_, err = utils.ParseString(bot, msg, errors.New("ответ3"), []string{structures.ADD_TO_FAVOURITE, structures.SHOW_SCHEDULE})
+		_, err = utils.ParseString(bot, msg, errors.New("ответ"), []string{structures.ADD_TO_FAVOURITE, structures.SHOW_SCHEDULE})
 		if err != nil {
-			handle.HandleConfirm(bot, msg, &friend.Identity)
+			handle.HandleConfirm(bot, msg, &friend.Identity, false)
 			break
 		}
 		if msg.Text == structures.ADD_TO_FAVOURITE {
