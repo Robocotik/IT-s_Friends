@@ -1,32 +1,28 @@
 package logic
 
 import (
-
-	// "Friends/src/utils/bd"
 	"errors"
+
 	"github.com/Robocotik/IT-s_Friends/assets/consts"
-	"github.com/Robocotik/IT-s_Friends/assets/keyboards"
+	keyboard "github.com/Robocotik/IT-s_Friends/assets/keyboards"
 	"github.com/Robocotik/IT-s_Friends/internal/database"
-	"github.com/Robocotik/IT-s_Friends/internal/models/errors"
+	errorsCustom "github.com/Robocotik/IT-s_Friends/internal/models/errors"
 	"github.com/Robocotik/IT-s_Friends/internal/models/structures"
 	"github.com/Robocotik/IT-s_Friends/internal/services/input"
 	"github.com/Robocotik/IT-s_Friends/internal/services/output"
 	"github.com/Robocotik/IT-s_Friends/internal/services/utils"
-	"github.com/Robocotik/IT-s_Friends/internal/transport/handlers"
-
+	handle "github.com/Robocotik/IT-s_Friends/internal/transport/handlers"
 	"github.com/jackc/pgx/v5"
 	"github.com/mymmrac/telego"
-	// "strconv"
 )
 
 var ch_zn_selected = ""
 
 func DoSwitch(conn *pgx.Conn, user *structures.User, friend *structures.AskedFriend, bot *telego.Bot, msg telego.Message) {
 	var err error
-	// utils.WriteMessage(bot, msg, strconv.FormatBool(exists))
 	switch user.State {
 	case structures.StateStart:
-		// bd.ParseAllSchdule(conn, bot, msg)
+
 		handle.HandleStart(bot, msg)
 		user.State = structures.StateDefault
 

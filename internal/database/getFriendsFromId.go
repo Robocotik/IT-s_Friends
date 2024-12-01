@@ -1,10 +1,11 @@
 package database
 
 import (
-	"github.com/Robocotik/IT-s_Friends/internal/models/structures"
 	"context"
 
+	"github.com/Robocotik/IT-s_Friends/internal/models/structures"
 	"github.com/jackc/pgx/v5"
+
 )
 
 func GetFriendsFromId(conn *pgx.Conn, userID int64) ([]structures.IFriendsShort, error) {
@@ -18,7 +19,7 @@ func GetFriendsFromId(conn *pgx.Conn, userID int64) ([]structures.IFriendsShort,
 	defer rows.Close()
 
 	for rows.Next() {
-		var nickname string 
+		var nickname string
 		var group_title string
 		if err := rows.Scan(&nickname, &group_title); err != nil {
 			return nil, err

@@ -3,10 +3,10 @@ package database
 import (
 	"context"
 	"fmt"
-	"github.com/Robocotik/IT-s_Friends/internal/models/structures"
-	"github.com/Robocotik/IT-s_Friends/internal/services/output"
 	"os"
 
+	"github.com/Robocotik/IT-s_Friends/internal/models/structures"
+	"github.com/Robocotik/IT-s_Friends/internal/services/output"
 	"github.com/jackc/pgx/v5"
 	"github.com/mymmrac/telego"
 )

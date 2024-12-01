@@ -11,10 +11,9 @@ import (
 	"github.com/Robocotik/IT-s_Friends/internal/models/structures"
 	"github.com/Robocotik/IT-s_Friends/internal/services/logic"
 	"github.com/Robocotik/IT-s_Friends/internal/services/notify"
+	"github.com/jackc/pgx/v5"
 	"github.com/joho/godotenv"
-
 	"github.com/mymmrac/telego"
-
 	th "github.com/mymmrac/telego/telegohandler"
 )
 
@@ -23,22 +22,32 @@ var (
 	sessionsMutex sync.Mutex
 )
 
-func init() {
+func initEnv() {
 	err := godotenv.Load("../configs/.env")
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
 }
 
+func initSessions(conn *pgx.Conn) {
+	users, _ := database.GetAllIds(conn)
+	for _, userId := range users {
+		sessions[userId] = &structures.User{
+			Id:     userId,
+			Exists: true,
+		}
+	}
+}
 
 func main() {
-	fmt.Sprintf("Я запустился")
+	initEnv()
 	botToken := os.Getenv("TOKEN")
 	bot, err := telego.NewBot(botToken)
 	botUser, _ := bot.GetMe()
 	updates, _ := bot.UpdatesViaLongPolling(nil)
 	conn, err := database.InitBD()
 	defer conn.Close(context.Background())
+	initSessions(conn)
 	bh, _ := th.NewBotHandler(bot, updates)
 	go notify.CronMain(conn, bot, botUser.ID)
 	if err != nil {
@@ -50,6 +59,9 @@ func main() {
 
 	defer bh.Stop()
 	defer bot.StopLongPolling()
+	// for _, session := range sessions {
+	// 	fmt.Println("в sessions ", session.Id)
+	// }
 
 	bh.HandleMessage(func(bot *telego.Bot, msg telego.Message) {
 		userID := msg.From.ID

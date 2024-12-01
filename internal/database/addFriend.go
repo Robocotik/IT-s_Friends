@@ -1,16 +1,17 @@
 package database
 
 import (
-	"github.com/Robocotik/IT-s_Friends/internal/models/errors"
-	"github.com/Robocotik/IT-s_Friends/internal/models/structures"
 	"context"
 	"errors"
 	"fmt"
 	"os"
 
+	"github.com/Robocotik/IT-s_Friends/internal/models/errors"
+	"github.com/Robocotik/IT-s_Friends/internal/models/structures"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/mymmrac/telego"
+
 )
 
 func AddFriend(bot *telego.Bot, msg telego.Message, conn *pgx.Conn, friend *structures.AskedFriend) (int64, error) {

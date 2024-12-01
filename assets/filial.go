@@ -1,11 +1,11 @@
 package assets
 
 import (
-	"github.com/Robocotik/IT-s_Friends/internal/services/output"
 	"context"
 	"fmt"
 	"os"
 
+	"github.com/Robocotik/IT-s_Friends/internal/services/output"
 	"github.com/jackc/pgx/v5"
 	"github.com/mymmrac/telego"
 )
@@ -40,7 +40,5 @@ func GetFilials(conn *pgx.Conn, bot *telego.Bot, msg telego.Message) []string {
 		output.RiseError(bot, msg, err)
 		return []string{""}
 	}
-
-	fmt.Println("I FOUND FILIALS: ", res)
 	return res
 }

@@ -1,16 +1,17 @@
 package database
 
 import (
-	"github.com/Robocotik/IT-s_Friends/internal/models/errors"
-	"github.com/Robocotik/IT-s_Friends/internal/services/output"
 	"context"
 	"errors"
 	"fmt"
 	"os"
 
+	errorsCustom "github.com/Robocotik/IT-s_Friends/internal/models/errors"
+	"github.com/Robocotik/IT-s_Friends/internal/services/output"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/mymmrac/telego"
+
 )
 
 func AddConnection(bot *telego.Bot, msg telego.Message, conn *pgx.Conn, user_id int64, friend_id int64) error {
