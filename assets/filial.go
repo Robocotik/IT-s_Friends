@@ -40,5 +40,6 @@ func GetFilials(conn *pgx.Conn, bot *telego.Bot, msg telego.Message) []string {
 		output.RiseError(bot, msg, err)
 		return []string{""}
 	}
+	fmt.Println(res)
 	return res
 }

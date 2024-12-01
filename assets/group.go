@@ -20,11 +20,11 @@ func GetGroups(conn *pgx.Conn, bot *telego.Bot, msg telego.Message, identity *st
 	SELECT g.title
 	FROM groups g
 	JOIN schedule s ON g.id = s.group_id
-	JOIN cathedras c ON s.cathedra_id = c.id
+	JOIN courses c ON s.course_id = c.id
 	JOIN fillials fi ON s.fillial_id = fi.id
-	WHERE c.title IN ($1) 
-	  AND fi.title IN ($2);
-`, identity.Cathedra, identity.Filial)
+	WHERE c.title = $1 
+	  AND fi.title = $2;
+`, identity.Course, identity.Filial)
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Query failed in getting groups: %v\n", err)

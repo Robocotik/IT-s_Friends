@@ -54,19 +54,10 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-
-	// fmt.Printf("Bot User: %+v\n", botUser)
-
 	defer bh.Stop()
 	defer bot.StopLongPolling()
-	// for _, session := range sessions {
-	// 	fmt.Println("в sessions ", session.Id)
-	// }
-
 	bh.HandleMessage(func(bot *telego.Bot, msg telego.Message) {
 		userID := msg.From.ID
-
-		// Блокируем доступ к UserSessions только для получения или создания сессии
 		sessionsMutex.Lock()
 		user, exists := sessions[userID]
 		if !exists {
