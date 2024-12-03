@@ -14,10 +14,10 @@ import (
 
 )
 
-func AddConnection(bot *telego.Bot, msg telego.Message, conn *pgx.Conn, user_id int64, friend_id int64) error {
+func AddConnection(ctx context.Context, bot *telego.Bot, msg telego.Message, conn *pgx.Conn, user_id int64, friend_id int64) error {
 	fmt.Printf("\n Я ДОБАВИЛ %s в %s : \n", user_id, friend_id)
 	_, err := conn.Exec(
-		context.Background(),
+		ctx,
 		"INSERT INTO user_friend (user_id, friend_id) VALUES ($1, $2)",
 		user_id, friend_id,
 	)

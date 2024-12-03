@@ -1,28 +1,27 @@
 package database
 
 import (
-	// "Friends/src/utils"
-	// "context"
-	// "fmt"
-	// "os"
+	"context"
+	"fmt"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/mymmrac/telego"
 )
 
-func UpdateBd(bot *telego.Bot, msg telego.Message, conn *pgx.Conn) error {
-	// fmt.Printf("\n Я ОБновил бд : \n")
-	// request := logic.
+func UpdateBd(ctx context.Context, conn *pgx.Conn, bot *telego.Bot, msg telego.Message) error {
+	ctxx, cancel := context.WithTimeout(ctx, 20*time.Second)
+	defer cancel()
+	err := ParseAllSchdule(ctxx, conn, bot, msg)
 
-	// _, err := conn.Exec(
-	// 	context.Background(),
-	// 	"INSERT INTO shedule (course_title, faculty_title, cathedra_title, group_title, timetable) VALUES ($1, $2, $3, $4, $5)",
-	// 	course_title, course_title, course_title , course_title , course_title
-	// )
-	// if err != nil {
-	// 	fmt.Fprintf(os.Stderr, "QueryRow failed in connection : %v\n", err)
-	// 	utils.RiseError(bot, msg, err)
-	// 	return err
-	// }
-	return nil
+	for {
+		select {
+		case <-ctxx.Done():
+			fmt.Println("Превышено время ожидания при обращении к бд")
+			return err
+		default:
+			fmt.Println("База данных успешно обновлена")
+		}
+	}
+	
 }

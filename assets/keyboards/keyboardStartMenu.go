@@ -14,5 +14,8 @@ func CreateKeyboardStartMenu() *telego.ReplyKeyboardMarkup {
 			tu.KeyboardButton(consts.FIND_NEW_FRIENDS),
 			tu.KeyboardButton(consts.SHOW_FRIENDS),
 		),
-	).WithResizeKeyboard().WithInputFieldPlaceholder(consts.FIND_NEW_FRIENDS + " / " + consts.SHOW_FRIENDS).WithOneTimeKeyboard()
+		tu.KeyboardRow(
+			tu.KeyboardButton(consts.SET_NOTIFICATIONS),
+		),
+	).WithResizeKeyboard().WithInputFieldPlaceholder(consts.FIND_NEW_FRIENDS + " / " + consts.SHOW_FRIENDS + " / " + consts.SET_NOTIFICATIONS).WithOneTimeKeyboard()
 }

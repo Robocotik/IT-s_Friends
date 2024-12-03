@@ -1,7 +1,5 @@
 package structures
 
-import "time"
-
 type State uint
 
 type User struct {
@@ -11,5 +9,5 @@ type User struct {
 	Id             int64
 	Friend         AskedFriend
 	Identity       Identity
-	NotifyInterval time.Duration
+	NotifyPeriod string
 }

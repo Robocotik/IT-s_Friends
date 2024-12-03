@@ -1,11 +1,11 @@
 package database
 
 import (
-	"github.com/Robocotik/IT-s_Friends/internal/models/web"
-	"github.com/Robocotik/IT-s_Friends/internal/services/output"
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/Robocotik/IT-s_Friends/internal/models/web"
+	"github.com/Robocotik/IT-s_Friends/internal/services/output"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -14,8 +14,8 @@ import (
 	"github.com/mymmrac/telego"
 )
 
-func ParseAllSchdule(conn *pgx.Conn, bot *telego.Bot, msg telego.Message) error {
-	resp, err := http.Get("https://lks.bmstu.ru/lks-back/api/v1/structure")
+func ParseAllSchdule(ctx context.Context, conn *pgx.Conn, bot *telego.Bot, msg telego.Message) error {
+	resp, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://lks.bmstu.ru/lks-back/api/v1/structure", nil)
 	var group_id, cathedra_id, faculty_id, fillial_id, course_id int64
 
 	if err != nil {

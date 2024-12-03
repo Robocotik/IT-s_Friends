@@ -12,6 +12,6 @@ func HandleMenuStart(bot *telego.Bot, msg telego.Message) {
 	keyboard := keyboard.CreateKeyboardStartMenu()
 	_, _ = bot.SendMessage(tu.Message(
 		msg.Chat.ChatID(),
-		fmt.Sprintf("Хочешь добавить нового друга или посмотреть список уже добавленных?"),
+		fmt.Sprintf("Выберите действие"),
 	).WithReplyMarkup(keyboard))
 }

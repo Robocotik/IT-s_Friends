@@ -1,16 +1,14 @@
 package input
 
 import (
+	"errors"
 	"strings"
-	"github.com/Robocotik/IT-s_Friends/internal/services/output"
+	// "github.com/Robocotik/IT-s_Friends/internal/services/output"
 	"github.com/mymmrac/telego"
 )
 
-func ParseContainString(bot *telego.Bot, msg telego.Message, err error, possibleData []string) string {
+func ParseContainString(bot *telego.Bot, msg telego.Message, possibleData []string) (string, error) {
 	found := false
-	if msg.Text == "" {
-		return "Я встретил пустую строку"
-	}
 	for _, data := range possibleData {
 		if strings.Contains(msg.Text, data) {
 			found = true
@@ -18,8 +16,8 @@ func ParseContainString(bot *telego.Bot, msg telego.Message, err error, possible
 		}
 	}
 	if !found {
-		output.RiseError(bot, msg, err)
-		return "-1"
+		// output.RiseError(bot, msg, err)
+		return "", errors.New("not found")
 	}
-	return msg.Text
+	return msg.Text, nil
 }

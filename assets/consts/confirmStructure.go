@@ -13,4 +13,5 @@ const (
 const (
 	FIND_NEW_FRIENDS = "Добавить нового друга"
 	SHOW_FRIENDS = "Посмотреть список друзей"
+	SET_NOTIFICATIONS = "Настроить уведомления"
 )

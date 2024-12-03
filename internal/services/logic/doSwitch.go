@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"context"
 	"errors"
 
 	"github.com/Robocotik/IT-s_Friends/assets/consts"
@@ -18,7 +19,7 @@ import (
 
 var ch_zn_selected = ""
 
-func DoSwitch(conn *pgx.Conn, user *structures.User, friend *structures.AskedFriend, bot *telego.Bot, msg telego.Message) {
+func DoSwitch(ctx context.Context, conn *pgx.Conn, user *structures.User, friend *structures.AskedFriend, bot *telego.Bot, msg telego.Message) {
 	var err error
 	switch user.State {
 	case structures.StateStart:
@@ -52,23 +53,53 @@ func DoSwitch(conn *pgx.Conn, user *structures.User, friend *structures.AskedFri
 			database.SetInfoForId(bot, msg, conn, user.Identity, msg.Chat.ID)
 		}
 	case structures.StateStartMenu:
-		_, err = input.ParseString(bot, msg, errors.New("ответ"), []string{consts.FIND_NEW_FRIENDS, consts.SHOW_FRIENDS})
+		_, err = input.ParseString(bot, msg, errors.New("ответ"), []string{consts.FIND_NEW_FRIENDS, consts.SHOW_FRIENDS, consts.SET_NOTIFICATIONS})
 		if err != nil {
 			handle.HandleMenuStart(bot, msg)
 			break
 		}
-		if msg.Text == consts.FIND_NEW_FRIENDS {
+		switch msg.Text {
+		case consts.FIND_NEW_FRIENDS:
 			handle.HandleSelectFilial(conn, bot, msg)
 			user.State = structures.StateAskForFriend
-		} else {
+
+		case consts.SET_NOTIFICATIONS:
+			handle.HandleSetNotifications(bot, msg)
+			user.State = structures.StateSetNotifications
+
+		default:
 			favs, err := database.GetFriendsFromId(conn, msg.Chat.ChatID().ID)
 			output.RiseError(bot, msg, err)
 			utils.FuncWithKeyboard(bot, msg, func() (string, error) {
 				return output.ShowFavs(favs)
 			}, keyboard.CreateKeyboardReturnToSearch())
 			user.State = structures.StateRedirectToStartSearch
-
 		}
+
+	case structures.StateSetNotifications:
+		val, err2 := input.ParseString(bot, msg, errors.New("вариант"), []string{consts.CUSTOM_TIME, consts.H1_BEFORE, consts.H2_BEFORE, consts.H3_BEFORE})
+		output.RiseError(bot, msg, err2)
+		if err2 != nil {
+			handle.HandleSetNotifications(bot, msg)
+			break
+		}
+		if val == consts.CUSTOM_TIME {
+			user.State = structures.StateSetCustomNotification
+			handle.HandleSetCustomNotification(bot, msg)
+
+		} else {
+			handle.HandleNotificationCreated(bot, msg)
+			user.State = structures.StateRedirectToStartSearch
+			// add server notification
+		}
+
+	case structures.StateSetCustomNotification:
+		user.NotifyPeriod, err = input.CheckPeriod(msg.Text)
+		if err != nil {
+			output.WriteMessage(bot, msg, "Неверный формат данных")
+			handle.HandleSetCustomNotification(bot, msg)
+		}
+		// add server notification
 
 	case structures.StateAskForFriend:
 		FillObjectWithInfo(&user.Friend.State, conn, bot, msg, &friend.Identity, false)
@@ -112,13 +143,14 @@ func DoSwitch(conn *pgx.Conn, user *structures.User, friend *structures.AskedFri
 				break
 			}
 		} else {
-			database.AddConnection(bot, msg, conn, msg.Chat.ChatID().ID, friend_id)
+			database.AddConnection(ctx, bot, msg, conn, msg.Chat.ChatID().ID, friend_id)
 			handle.HandleAddToHavourite(bot, msg)
 		}
 		user.State = structures.StateRedirectToStartSearch
 
 	case structures.StateShowTimetable: // Вывод расписания
-		ch_zn_selected := input.ParseContainString(bot, msg, errors.New("Неизвестная четность недели"), []string{consts.Ch, consts.Zn})
+		ch_zn_selected, err := input.ParseContainString(bot, msg, []string{consts.Ch, consts.Zn})
+		output.RiseError(bot, msg, err)
 		keyboard := keyboard.CreateKeyboardShowTimetable()
 		output.ShowTimetable(bot, msg, keyboard, friend.Request, ch_zn_selected)
 		user.State = structures.StateRedirectToStartSearch

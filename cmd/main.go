@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/Robocotik/IT-s_Friends/internal/database"
 	"github.com/Robocotik/IT-s_Friends/internal/models/structures"
@@ -30,7 +31,10 @@ func initEnv() {
 }
 
 func initSessions(conn *pgx.Conn) {
-	users, _ := database.GetAllIds(conn)
+	users, err := database.GetAllIds(conn)
+	if (err != nil){
+		fmt.Println("Ошибка при получении всех пользователей ", err)
+	}
 	for _, userId := range users {
 		sessions[userId] = &structures.User{
 			Id:     userId,
@@ -43,8 +47,18 @@ func main() {
 	initEnv()
 	botToken := os.Getenv("TOKEN")
 	bot, err := telego.NewBot(botToken)
-	botUser, _ := bot.GetMe()
-	updates, _ := bot.UpdatesViaLongPolling(nil)
+	botUser, err := bot.GetMe()
+	if err != nil {
+		fmt.Println("Ошибка при получении бота " + err.Error())
+	}
+	updates, err := bot.UpdatesViaLongPolling(nil)
+	if err != nil {
+		fmt.Println("Ошибка при update " + err.Error())
+	}
+	ctxMain, mainCancel := context.WithCancel(context.Background())
+	defer mainCancel()
+	ctxTimer, cancel := context.WithTimeout(ctxMain, 10*time.Second)
+	defer cancel()
 	conn, err := database.InitBD()
 	defer conn.Close(context.Background())
 	initSessions(conn)
@@ -72,8 +86,17 @@ func main() {
 		sessionsMutex.Unlock()
 
 		go func() {
-			logic.DoSwitch(conn, user, &user.Friend, bot, msg)
+			logic.DoSwitch(ctxMain, conn, user, &user.Friend, bot, msg)
 		}()
 	})
 	bh.Start()
+	for {
+		select {
+		case <-ctxTimer.Done():
+			fmt.Println("Ошибка при установки соединения с базой данных")
+		default:
+			fmt.Println("Соединение с базой данных установлено")
+		}
+
+	}
 }

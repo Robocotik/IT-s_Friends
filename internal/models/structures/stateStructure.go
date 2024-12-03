@@ -9,6 +9,9 @@ const (
 	StateStartMenu
 	StateAskForFriend
 
+	StateSetNotifications
+	StateSetCustomNotification
+
 	StateSearch
 	StateGroupFound
 	StateAskNickname
