@@ -1,7 +1,7 @@
 package logic
 
 import (
-	"github.com/Robocotik/IT-s_Friends/internal/models/web"
+	"github.com/Robocotik/IT-s_Friends/internal/models/entities"
 	"encoding/json"
 	"fmt"
 	"github.com/mymmrac/telego"

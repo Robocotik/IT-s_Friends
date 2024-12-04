@@ -1,7 +1,7 @@
 package output
 
 import (
-	"github.com/Robocotik/IT-s_Friends/internal/models/web"
+	"github.com/Robocotik/IT-s_Friends/internal/models/entities"
 	"github.com/mymmrac/telego"
 )
 

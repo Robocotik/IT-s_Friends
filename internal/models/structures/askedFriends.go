@@ -1,6 +1,6 @@
 package structures
 
-import "github.com/Robocotik/IT-s_Friends/internal/models/web"
+import "github.com/Robocotik/IT-s_Friends/internal/models/entities"
 
 type AskedFriend struct {
 	Identity Identity

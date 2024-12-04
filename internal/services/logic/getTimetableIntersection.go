@@ -3,7 +3,7 @@ package logic
 import (
 	"errors"
 
-	entities "github.com/Robocotik/IT-s_Friends/internal/models/web"
+	entities "github.com/Robocotik/IT-s_Friends/internal/models/entities"
 )
 
 func GetTimetableIntarsection(meSchedule []entities.IDay, friendSchedule []entities.IDay, day int) (int, int, error) {

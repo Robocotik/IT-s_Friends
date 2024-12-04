@@ -1,4 +1,4 @@
-package database
+package postgres
 
 import (
 	"context"
@@ -11,8 +11,8 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/mymmrac/telego"
-
 )
+
 
 func AddConnection(ctx context.Context, bot *telego.Bot, msg telego.Message, conn *pgx.Conn, user_id int64, friend_id int64) error {
 	fmt.Printf("\n Я ДОБАВИЛ %s в %s : \n", user_id, friend_id)

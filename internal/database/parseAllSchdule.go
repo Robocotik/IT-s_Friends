@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/Robocotik/IT-s_Friends/internal/models/web"
+	"github.com/Robocotik/IT-s_Friends/internal/models/entities"
 	"github.com/Robocotik/IT-s_Friends/internal/services/output"
 	"io/ioutil"
 	"net/http"

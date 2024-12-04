@@ -3,7 +3,7 @@ package output
 import (
 	// "Friends/src/components/structures"
 
-	"github.com/Robocotik/IT-s_Friends/internal/models/web"
+	"github.com/Robocotik/IT-s_Friends/internal/models/entities"
 	"strconv"
 
 	"github.com/mymmrac/telego"

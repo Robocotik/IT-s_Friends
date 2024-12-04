@@ -6,7 +6,7 @@ import (
 
 	"github.com/Robocotik/IT-s_Friends/assets/consts"
 	keyboard "github.com/Robocotik/IT-s_Friends/assets/keyboards"
-	"github.com/Robocotik/IT-s_Friends/internal/database"
+	"github.com/Robocotik/IT-s_Friends/internal/database/postgres"
 	errorsCustom "github.com/Robocotik/IT-s_Friends/internal/models/errors"
 	"github.com/Robocotik/IT-s_Friends/internal/models/structures"
 	"github.com/Robocotik/IT-s_Friends/internal/services/input"
@@ -50,7 +50,7 @@ func DoSwitch(ctx context.Context, conn *pgx.Conn, user *structures.User, friend
 			handle.HandleMenuStart(bot, msg)
 			user.State = structures.StateStartMenu
 			user.Exists = true
-			database.SetInfoForId(bot, msg, conn, user.Identity, msg.Chat.ID)
+			postgres.SetInfoForId(bot, msg, conn, user.Identity, msg.Chat.ID)
 		}
 	case structures.StateStartMenu:
 		_, err = input.ParseString(bot, msg, errors.New("ответ"), []string{consts.FIND_NEW_FRIENDS, consts.SHOW_FRIENDS, consts.SET_NOTIFICATIONS})
@@ -68,7 +68,7 @@ func DoSwitch(ctx context.Context, conn *pgx.Conn, user *structures.User, friend
 			user.State = structures.StateSetNotifications
 
 		default:
-			favs, err := database.GetFriendsFromId(conn, msg.Chat.ChatID().ID)
+			favs, err := postgres.GetFriendsFromId(conn, msg.Chat.ChatID().ID)
 			output.RiseError(bot, msg, err)
 			utils.FuncWithKeyboard(bot, msg, func() (string, error) {
 				return output.ShowFavs(favs)
@@ -135,7 +135,7 @@ func DoSwitch(ctx context.Context, conn *pgx.Conn, user *structures.User, friend
 
 	case structures.StateAskNickname:
 		friend.NickName = msg.Text
-		friend_id, err := database.AddFriend(bot, msg, conn, friend)
+		friend_id, err := postgres.AddFriend(bot, msg, conn, friend)
 		if err != nil {
 			if err.Error() == errorsCustom.ErrTooLongMessage_23514 {
 				output.WriteMessage(bot, msg, errorsCustom.ErrTooLongMessage_23514)
@@ -143,7 +143,7 @@ func DoSwitch(ctx context.Context, conn *pgx.Conn, user *structures.User, friend
 				break
 			}
 		} else {
-			database.AddConnection(ctx, bot, msg, conn, msg.Chat.ChatID().ID, friend_id)
+			postgres.AddConnection(ctx, bot, msg, conn, msg.Chat.ChatID().ID, friend_id)
 			handle.HandleAddToHavourite(bot, msg)
 		}
 		user.State = structures.StateRedirectToStartSearch

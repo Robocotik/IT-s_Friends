@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Robocotik/IT-s_Friends/internal/database"
+	"github.com/Robocotik/IT-s_Friends/internal/database/postgres"
 	"github.com/Robocotik/IT-s_Friends/internal/models/structures"
 	"github.com/Robocotik/IT-s_Friends/internal/services/logic"
 	"github.com/Robocotik/IT-s_Friends/internal/services/notify"
@@ -31,7 +31,7 @@ func initEnv() {
 }
 
 func initSessions(conn *pgx.Conn) {
-	users, err := database.GetAllIds(conn)
+	users, err := postgres.GetAllIds(conn)
 	if (err != nil){
 		fmt.Println("Ошибка при получении всех пользователей ", err)
 	}
@@ -59,7 +59,7 @@ func main() {
 	defer mainCancel()
 	ctxTimer, cancel := context.WithTimeout(ctxMain, 10*time.Second)
 	defer cancel()
-	conn, err := database.InitBD()
+	conn, err := postgres.InitBD()
 	defer conn.Close(context.Background())
 	initSessions(conn)
 	bh, _ := th.NewBotHandler(bot, updates)
@@ -81,7 +81,7 @@ func main() {
 				Exists: false,
 			}
 			sessions[userID] = user
-			database.AddUserId(bot, msg, conn, msg.Chat.ChatID().ID, msg.From.Username)
+			postgres.AddUserId(bot, msg, conn, msg.Chat.ChatID().ID, msg.From.Username)
 		}
 		sessionsMutex.Unlock()
 
