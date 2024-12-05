@@ -8,19 +8,14 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Robocotik/IT-s_Friends/internal/database"
 	"github.com/Robocotik/IT-s_Friends/internal/database/postgres"
 	"github.com/Robocotik/IT-s_Friends/internal/models/structures"
 	"github.com/Robocotik/IT-s_Friends/internal/services/logic"
 	"github.com/Robocotik/IT-s_Friends/internal/services/notify"
-	"github.com/jackc/pgx/v5"
 	"github.com/joho/godotenv"
 	"github.com/mymmrac/telego"
 	th "github.com/mymmrac/telego/telegohandler"
-)
-
-var (
-	sessions      = make(map[int64]*structures.User)
-	sessionsMutex sync.Mutex
 )
 
 func initEnv() {
@@ -30,21 +25,11 @@ func initEnv() {
 	}
 }
 
-func initSessions(conn *pgx.Conn) {
-	users, err := postgres.GetAllIds(conn)
-	if (err != nil){
-		fmt.Println("Ошибка при получении всех пользователей ", err)
-	}
-	for _, userId := range users {
-		sessions[userId] = &structures.User{
-			Id:     userId,
-			Exists: true,
-		}
-	}
-}
-
 func main() {
 	initEnv()
+
+	sessions := make(map[int64]*structures.User)
+	var sessionsMutex sync.Mutex
 	botToken := os.Getenv("TOKEN")
 	bot, err := telego.NewBot(botToken)
 	botUser, err := bot.GetMe()
@@ -59,11 +44,12 @@ func main() {
 	defer mainCancel()
 	ctxTimer, cancel := context.WithTimeout(ctxMain, 10*time.Second)
 	defer cancel()
-	conn, err := postgres.InitBD()
-	defer conn.Close(context.Background())
-	initSessions(conn)
+	var psql postgres.Postgres
+	psql.Conn, err = database.NewDatabase("POSTGRES_DRIVER", "POSTGRES_USER", "POSTGRES_PASSWORD", "POSTGRES_HOST", "POSTGRES_PORT", "POSTGRES_TABLE")
+	defer psql.Conn.Close(context.Background())
+	psql.InitSessions(&sessions)
 	bh, _ := th.NewBotHandler(bot, updates)
-	go notify.CronMain(conn, bot, botUser.ID)
+	go notify.CronMain(psql.Conn, bot, botUser.ID)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -81,12 +67,12 @@ func main() {
 				Exists: false,
 			}
 			sessions[userID] = user
-			postgres.AddUserId(bot, msg, conn, msg.Chat.ChatID().ID, msg.From.Username)
+			psql.AddUserId(bot, msg, msg.Chat.ChatID().ID, msg.From.Username)
 		}
 		sessionsMutex.Unlock()
 
 		go func() {
-			logic.DoSwitch(ctxMain, conn, user, &user.Friend, bot, msg)
+			logic.DoSwitch(ctxMain, psql, user, &user.Friend, bot, msg)
 		}()
 	})
 	bh.Start()

@@ -6,20 +6,19 @@ import (
 
 	"github.com/Robocotik/IT-s_Friends/assets/consts"
 	keyboard "github.com/Robocotik/IT-s_Friends/assets/keyboards"
-	"github.com/Robocotik/IT-s_Friends/internal/database/postgres"
+	"github.com/Robocotik/IT-s_Friends/internal/database"
 	errorsCustom "github.com/Robocotik/IT-s_Friends/internal/models/errors"
 	"github.com/Robocotik/IT-s_Friends/internal/models/structures"
 	"github.com/Robocotik/IT-s_Friends/internal/services/input"
 	"github.com/Robocotik/IT-s_Friends/internal/services/output"
 	"github.com/Robocotik/IT-s_Friends/internal/services/utils"
 	handle "github.com/Robocotik/IT-s_Friends/internal/transport/handlers"
-	"github.com/jackc/pgx/v5"
 	"github.com/mymmrac/telego"
 )
 
 var ch_zn_selected = ""
 
-func DoSwitch(ctx context.Context, conn *pgx.Conn, user *structures.User, friend *structures.AskedFriend, bot *telego.Bot, msg telego.Message) {
+func DoSwitch(ctx context.Context, bd database.IBd, user *structures.User, friend *structures.AskedFriend, bot *telego.Bot, msg telego.Message) {
 	var err error
 	switch user.State {
 	case structures.StateStart:
@@ -41,16 +40,16 @@ func DoSwitch(ctx context.Context, conn *pgx.Conn, user *structures.User, friend
 			user.State = structures.UserNotExists
 		}
 	case structures.UserNotExists:
-		handle.HandleSelectFilial(conn, bot, msg)
+		handle.HandleSelectFilial(bd, bot, msg)
 		user.State = structures.StateAskForMe
 
 	case structures.StateAskForMe:
-		FillObjectWithInfo(&user.StateFilling, conn, bot, msg, &user.Identity, true)
+		FillObjectWithInfo(&user.StateFilling, bd, bot, msg, &user.Identity, true)
 		if user.StateFilling == structures.StateSearch {
 			handle.HandleMenuStart(bot, msg)
 			user.State = structures.StateStartMenu
 			user.Exists = true
-			postgres.SetInfoForId(bot, msg, conn, user.Identity, msg.Chat.ID)
+			bd.UpdateUser(bot, msg, user.Identity, msg.Chat.ID)
 		}
 	case structures.StateStartMenu:
 		_, err = input.ParseString(bot, msg, errors.New("ответ"), []string{consts.FIND_NEW_FRIENDS, consts.SHOW_FRIENDS, consts.SET_NOTIFICATIONS})
@@ -60,7 +59,7 @@ func DoSwitch(ctx context.Context, conn *pgx.Conn, user *structures.User, friend
 		}
 		switch msg.Text {
 		case consts.FIND_NEW_FRIENDS:
-			handle.HandleSelectFilial(conn, bot, msg)
+			handle.HandleSelectFilial(bd, bot, msg)
 			user.State = structures.StateAskForFriend
 
 		case consts.SET_NOTIFICATIONS:
@@ -68,7 +67,7 @@ func DoSwitch(ctx context.Context, conn *pgx.Conn, user *structures.User, friend
 			user.State = structures.StateSetNotifications
 
 		default:
-			favs, err := postgres.GetFriendsFromId(conn, msg.Chat.ChatID().ID)
+			favs, err := bd.GetFriendsFromId(msg.Chat.ChatID().ID)
 			output.RiseError(bot, msg, err)
 			utils.FuncWithKeyboard(bot, msg, func() (string, error) {
 				return output.ShowFavs(favs)
@@ -102,14 +101,14 @@ func DoSwitch(ctx context.Context, conn *pgx.Conn, user *structures.User, friend
 		// add server notification
 
 	case structures.StateAskForFriend:
-		FillObjectWithInfo(&user.Friend.State, conn, bot, msg, &friend.Identity, false)
+		FillObjectWithInfo(&user.Friend.State, bd, bot, msg, &friend.Identity, false)
 		if user.Friend.State == structures.StateSearch {
 			user.State = structures.StateSearch
 			user.Friend.State = structures.StateAskFilial
 		}
 
 	case structures.StateSearch:
-		friend.Identity.Uuid = SearchGroupUID(bot, msg, conn, &friend.Identity)
+		friend.Identity.Uuid = bd.GetGroupByUID(bot, msg, &friend.Identity)
 		friend.Request = DoRequest(bot, msg, friend.Identity.Uuid)
 		if len(friend.Request.Data.Schedule) != 0 { // проверка на наличие расписания
 			handle.HandleGroupFound(bot, msg)
@@ -135,7 +134,7 @@ func DoSwitch(ctx context.Context, conn *pgx.Conn, user *structures.User, friend
 
 	case structures.StateAskNickname:
 		friend.NickName = msg.Text
-		friend_id, err := postgres.AddFriend(bot, msg, conn, friend)
+		friend_id, err := bd.AddFriend(bot, msg, friend)
 		if err != nil {
 			if err.Error() == errorsCustom.ErrTooLongMessage_23514 {
 				output.WriteMessage(bot, msg, errorsCustom.ErrTooLongMessage_23514)
@@ -143,7 +142,7 @@ func DoSwitch(ctx context.Context, conn *pgx.Conn, user *structures.User, friend
 				break
 			}
 		} else {
-			postgres.AddConnection(ctx, bot, msg, conn, msg.Chat.ChatID().ID, friend_id)
+			bd.AddConnection(ctx, bot, msg, msg.Chat.ChatID().ID, friend_id)
 			handle.HandleAddToHavourite(bot, msg)
 		}
 		user.State = structures.StateRedirectToStartSearch

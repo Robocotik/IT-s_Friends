@@ -1,23 +1,22 @@
-package assets
+package postgres
 
 import (
 	"github.com/Robocotik/IT-s_Friends/internal/models/structures"
 	"github.com/Robocotik/IT-s_Friends/internal/services/output"
-	
+
 	"context"
 	"fmt"
 	"os"
 
-	"github.com/jackc/pgx/v5"
 	"github.com/mymmrac/telego"
 )
 
-func GetCourses(conn *pgx.Conn, bot *telego.Bot, msg telego.Message, identity *structures.Identity) []string {
+func (psql Postgres) GetCourses(bot *telego.Bot, msg telego.Message, identity *structures.Identity) []string {
 
 	var res []string
 	var coursesTitle string
 
-	rows, err := conn.Query(context.Background(), `
+	rows, err := psql.Conn.Query(context.Background(), `
 	SELECT DISTINCT c.title
 	FROM courses c
 	JOIN schedule s ON c.id = s.course_id

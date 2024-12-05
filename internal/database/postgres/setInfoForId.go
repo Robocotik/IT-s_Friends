@@ -7,13 +7,12 @@ import (
 
 	"github.com/Robocotik/IT-s_Friends/internal/models/structures"
 	"github.com/Robocotik/IT-s_Friends/internal/services/output"
-	"github.com/jackc/pgx/v5"
 	"github.com/mymmrac/telego"
 )
 
-func SetInfoForId(bot *telego.Bot, msg telego.Message, conn *pgx.Conn, identity structures.Identity, id int64) error {
+func (psql Postgres) UpdateUser(bot *telego.Bot, msg telego.Message, identity structures.Identity, id int64) error {
 
-	_, err := conn.Exec(context.Background(), `
+	_, err := psql.Conn.Exec(context.Background(), `
 	UPDATE users SET fillial_title = $1,
 	 faculty_title = $2, 
 	 course_title = $3,

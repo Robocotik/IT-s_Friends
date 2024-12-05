@@ -8,15 +8,14 @@ import (
 
 	errorsCustom "github.com/Robocotik/IT-s_Friends/internal/models/errors"
 	"github.com/Robocotik/IT-s_Friends/internal/services/output"
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/mymmrac/telego"
 )
 
 
-func AddConnection(ctx context.Context, bot *telego.Bot, msg telego.Message, conn *pgx.Conn, user_id int64, friend_id int64) error {
+func (psql Postgres) AddConnection(ctx context.Context, bot *telego.Bot, msg telego.Message, user_id int64, friend_id int64) error {
 	fmt.Printf("\n Я ДОБАВИЛ %s в %s : \n", user_id, friend_id)
-	_, err := conn.Exec(
+	_, err := psql.Conn.Exec(
 		ctx,
 		"INSERT INTO user_friend (user_id, friend_id) VALUES ($1, $2)",
 		user_id, friend_id,

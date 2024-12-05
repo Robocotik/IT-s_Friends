@@ -1,16 +1,17 @@
 package handle
 
 import (
-	keyboard "github.com/Robocotik/IT-s_Friends/assets/keyboards"
 	"fmt"
 
-	"github.com/jackc/pgx/v5"
+	keyboard "github.com/Robocotik/IT-s_Friends/assets/keyboards"
+	"github.com/Robocotik/IT-s_Friends/internal/database"
+
 	"github.com/mymmrac/telego"
 	tu "github.com/mymmrac/telego/telegoutil"
 )
 
-func HandleSelectFilial(conn *pgx.Conn, bot *telego.Bot, msg telego.Message) {
-	keyboard := keyboard.CreateKeyboardFilial(conn, bot, msg)
+func HandleSelectFilial(bd database.IBd, bot *telego.Bot, msg telego.Message) {
+	keyboard := keyboard.CreateKeyboardFilial(bd, bot, msg)
 	_, _ = bot.SendMessage(tu.Message(
 		msg.Chat.ChatID(),
 		fmt.Sprintf("Выберите филиал"),

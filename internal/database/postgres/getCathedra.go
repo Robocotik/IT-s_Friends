@@ -1,21 +1,23 @@
-package assets
+package postgres
 
 import (
-	"github.com/Robocotik/IT-s_Friends/internal/models/structures"
-	"github.com/Robocotik/IT-s_Friends/internal/services/output"
 	"context"
 
+
+	"github.com/Robocotik/IT-s_Friends/internal/models/structures"
+	"github.com/Robocotik/IT-s_Friends/internal/services/output"
+
 	"fmt"
-	"github.com/jackc/pgx/v5"
-	"github.com/mymmrac/telego"
 	"os"
+
+	"github.com/mymmrac/telego"
 )
 
-func GetCathedras(conn *pgx.Conn, bot *telego.Bot, msg telego.Message, identity *structures.Identity) []string {
+func (psql Postgres) GetCathedras(bot *telego.Bot, msg telego.Message, identity *structures.Identity) []string {
 
 	var res []string
 	var cathedraTitle string
-	rows, err := conn.Query(context.Background(), `
+	rows, err := psql.Conn.Query(context.Background(), `
 	SELECT DISTINCT ca.title
 	FROM cathedras ca
 	JOIN schedule s ON ca.id = s.cathedra_id

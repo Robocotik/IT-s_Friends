@@ -1,22 +1,21 @@
-package assets
+package postgres
 
 import (
 	"github.com/Robocotik/IT-s_Friends/internal/models/structures"
 	"github.com/Robocotik/IT-s_Friends/internal/services/output"
-	
+
 	"context"
 	"fmt"
 	"os"
 
-	"github.com/jackc/pgx/v5"
 	"github.com/mymmrac/telego"
 )
 
-func GetFaculties(conn *pgx.Conn, bot *telego.Bot, msg telego.Message, identity *structures.Identity) []string {
+func (psql Postgres) GetFaculties(bot *telego.Bot, msg telego.Message, identity *structures.Identity) []string {
 
 	var res []string
 	var facultyTitle string
-	rows, err := conn.Query(context.Background(), `
+	rows, err := psql.Conn.Query(context.Background(), `
 	SELECT DISTINCT f.title
 	FROM faculties f
 	JOIN schedule s ON f.id = s.faculty_id

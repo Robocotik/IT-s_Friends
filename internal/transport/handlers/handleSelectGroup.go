@@ -1,17 +1,18 @@
 package handle
 
 import (
-	keyboard "github.com/Robocotik/IT-s_Friends/assets/keyboards"
-	"github.com/Robocotik/IT-s_Friends/internal/models/structures"
 	"fmt"
 
-	"github.com/jackc/pgx/v5"
+	keyboard "github.com/Robocotik/IT-s_Friends/assets/keyboards"
+	"github.com/Robocotik/IT-s_Friends/internal/database"
+	"github.com/Robocotik/IT-s_Friends/internal/models/structures"
+
 	"github.com/mymmrac/telego"
 	tu "github.com/mymmrac/telego/telegoutil"
 )
 
-func HandleSelectGroup(conn *pgx.Conn, bot *telego.Bot, msg telego.Message, identity *structures.Identity) {
-	keyboard := keyboard.CreateKeyboardGroup(conn, bot, msg, identity)
+func HandleSelectGroup(bd database.IBd, bot *telego.Bot, msg telego.Message, identity *structures.Identity) {
+	keyboard := keyboard.CreateKeyboardGroup(bd, bot, msg, identity)
 	_, _ = bot.SendMessage(tu.Message(
 		msg.Chat.ChatID(),
 		fmt.Sprintf("Выберите группу"),

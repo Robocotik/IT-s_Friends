@@ -2,15 +2,11 @@ package postgres
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5"
-
 )
 
-func GetAllIds(conn *pgx.Conn) ([]int64, error) {
+func (psql Postgres) GetAllIds() ([]int64, error) {
 	var res []int64
-
-	rows, err := conn.Query(context.Background(),
+	rows, err := psql.Conn.Query(context.Background(),
 		"SELECT id FROM users")
 	if err != nil {
 		return []int64{}, err

@@ -1,21 +1,21 @@
-package logic
+package postgres
 
 import (
-	"github.com/Robocotik/IT-s_Friends/internal/models/structures"
-	"github.com/Robocotik/IT-s_Friends/internal/services/output"
 	"context"
 	"fmt"
 	"os"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/Robocotik/IT-s_Friends/internal/models/structures"
+	"github.com/Robocotik/IT-s_Friends/internal/services/output"
+
 	"github.com/mymmrac/telego"
 )
 
-func SearchGroupUID(bot *telego.Bot, msg telego.Message, conn *pgx.Conn, identity *structures.Identity) string {
+func (psql Postgres) GetGroupByUID(bot *telego.Bot, msg telego.Message, identity *structures.Identity) string {
 	var res string
 
 	// Исправлено: добавлена корректная SQL команда
-	err := conn.QueryRow(
+	err := psql.Conn.QueryRow(
 		context.Background(),
 		`
 		SELECT uuid FROM schedule

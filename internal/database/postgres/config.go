@@ -1,32 +1,15 @@
 package postgres
 
-import "github.com/jackc/pgx/v5"
+import (
+	"github.com/jackc/pgx/v5"
+)
 
-type Reader interface {
-	GetFriends()
-	GetFriendsFromId()
-}
-
-type Updater interface {
-	UpdateUser()
-}
-
-type Inserter interface {
-	AddConnection()
-	AddFriend()
-	AddUserById()
-
-}
-
-type BD interface {
-	Reader
-	Updater
-	Inserter
-}
-
-type postgres struct {
-	conn *pgx.Conn
-	Reader
-	Updater
-	Inserter
+type Postgres struct {
+	Conn        *pgx.Conn
+	DB_DRIVER   string
+	DB_USER     string
+	DB_PORT     string
+	DB_PASSWORD string
+	DB_HOST     string
+	DB_TABLE    string
 }
