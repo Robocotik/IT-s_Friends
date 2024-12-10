@@ -9,8 +9,8 @@ import (
 	tu "github.com/mymmrac/telego/telegoutil"
 )
 
-func CreateKeyboardCourse(bd database.IBd, bot *telego.Bot, msg telego.Message, identity *structures.Identity) *telego.ReplyKeyboardMarkup {
-	var courses = bd.GetCourses(bot, msg, identity)
+func CreateKeyboardCourse(bd database.IBd, bot *telego.Bot, chatID int64, identity *structures.Identity) *telego.ReplyKeyboardMarkup {
+	var courses = bd.GetCourses(bot, chatID, identity)
 	var items_rows [][]telego.KeyboardButton = utils.GetItemsRow(courses)
 	return tu.Keyboard(
 		items_rows...,

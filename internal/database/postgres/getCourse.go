@@ -11,7 +11,7 @@ import (
 	"github.com/mymmrac/telego"
 )
 
-func (psql Postgres) GetCourses(bot *telego.Bot, msg telego.Message, identity *structures.Identity) []string {
+func (psql Postgres) GetCourses(bot *telego.Bot, chatID int64, identity *structures.Identity) []string {
 
 	var res []string
 	var coursesTitle string
@@ -27,7 +27,7 @@ func (psql Postgres) GetCourses(bot *telego.Bot, msg telego.Message, identity *s
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Query failed in getting courses: %v\n", err)
-		output.RiseError(bot, msg, err)
+		output.RiseError(bot, chatID, err)
 		return []string{""}
 	}
 	defer rows.Close()
@@ -36,7 +36,7 @@ func (psql Postgres) GetCourses(bot *telego.Bot, msg telego.Message, identity *s
 		err := rows.Scan(&coursesTitle)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to scan course title: %v\n", err)
-			output.RiseError(bot, msg, err)
+			output.RiseError(bot, chatID, err)
 			return []string{""}
 		}
 		res = append(res, coursesTitle)
@@ -44,7 +44,7 @@ func (psql Postgres) GetCourses(bot *telego.Bot, msg telego.Message, identity *s
 
 	if err := rows.Err(); err != nil {
 		fmt.Fprintf(os.Stderr, "Error occurred during row iteration: %v\n", err)
-		output.RiseError(bot, msg, err)
+		output.RiseError(bot, chatID, err)
 		return []string{""}
 	}
 

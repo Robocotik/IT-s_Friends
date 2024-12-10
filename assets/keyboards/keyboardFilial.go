@@ -8,8 +8,8 @@ import (
 	tu "github.com/mymmrac/telego/telegoutil"
 )
 
-func CreateKeyboardFilial(bd database.IBd, bot *telego.Bot, msg telego.Message) *telego.ReplyKeyboardMarkup {
-	var filials = bd.GetFilials(bot, msg)
+func CreateKeyboardFilial(bd database.IBd, bot *telego.Bot, chatID int64) *telego.ReplyKeyboardMarkup {
+	var filials = bd.GetFilials(bot, chatID)
 	var items_rows [][]telego.KeyboardButton = utils.GetItemsRow(filials)
 	return tu.Keyboard(
 		items_rows...,

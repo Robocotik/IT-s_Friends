@@ -4,8 +4,8 @@ import (
 	"github.com/mymmrac/telego"
 )
 
-func RiseError(bot *telego.Bot, msg telego.Message, err error) {
+func RiseError(bot *telego.Bot, chatID int64, err error) {
 	if err != nil {
-		WriteMessage(bot, msg, "Неверный "+err.Error()+", попробуй еще раз :)")
+		WriteMessage(bot, chatID, "Неверный "+err.Error()+", попробуй еще раз :)")
 	}
 }

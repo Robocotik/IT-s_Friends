@@ -9,8 +9,8 @@ import (
 	tu "github.com/mymmrac/telego/telegoutil"
 )
 
-func CreateKeyboardGroup(bd database.IBd, bot *telego.Bot, msg telego.Message, identity *structures.Identity) *telego.ReplyKeyboardMarkup {
-	var groups = bd.GetGroups(bot, msg, identity)
+func CreateKeyboardGroup(bd database.IBd, bot *telego.Bot, chatID int64, identity *structures.Identity) *telego.ReplyKeyboardMarkup {
+	var groups = bd.GetGroups(bot, chatID, identity)
 	var items_rows [][]telego.KeyboardButton = utils.GetItemsRow(groups)
 	return tu.Keyboard(
 		items_rows...,

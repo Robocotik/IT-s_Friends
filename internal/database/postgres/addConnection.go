@@ -13,7 +13,7 @@ import (
 )
 
 
-func (psql Postgres) AddConnection(ctx context.Context, bot *telego.Bot, msg telego.Message, user_id int64, friend_id int64) error {
+func (psql Postgres) AddConnection(ctx context.Context, bot *telego.Bot, chatID int64, user_id int64, friend_id int64) error {
 	fmt.Printf("\n Я ДОБАВИЛ %s в %s : \n", user_id, friend_id)
 	_, err := psql.Conn.Exec(
 		ctx,
@@ -24,12 +24,12 @@ func (psql Postgres) AddConnection(ctx context.Context, bot *telego.Bot, msg tel
 		if pgErr, ok := err.(*pgconn.PgError); ok {
 			if pgErr.Code == "23503" { // Код ошибки для нарушения ограничения
 				fmt.Fprintf(os.Stderr, "Insert failed: constraint violation on name_length: %v\n", pgErr.Message)
-				output.WriteMessage(bot, msg, errorsCustom.ErrFriendAlreadyAdded_23503)
+				output.WriteMessage(bot, chatID, errorsCustom.ErrFriendAlreadyAdded_23503)
 				return errors.New(errorsCustom.ErrFriendAlreadyAdded_23503)
 			}
 		}
 		fmt.Fprintf(os.Stderr, "QueryRow failed in connection : %v\n", err)
-		output.RiseError(bot, msg, err)
+		output.RiseError(bot, chatID, err)
 		return err
 	}
 	return nil

@@ -11,8 +11,8 @@ import (
 	// "fmt"
 )
 
-func CreateKeyboardFaculty(bd database.IBd, bot *telego.Bot, msg telego.Message, identity *structures.Identity) *telego.ReplyKeyboardMarkup {
-	var faculties = bd.GetFaculties(bot, msg, identity)
+func CreateKeyboardFaculty(bd database.IBd, bot *telego.Bot, chatID int64, identity *structures.Identity) *telego.ReplyKeyboardMarkup {
+	var faculties = bd.GetFaculties(bot, chatID, identity)
 	var items_rows [][]telego.KeyboardButton = utils.GetItemsRow(faculties)
 	return tu.Keyboard(
 		items_rows...,

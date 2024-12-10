@@ -12,8 +12,8 @@ import (
 )
 
 
-func CreateKeyboardCathedra(bd database.IBd, bot *telego.Bot, msg telego.Message, identity *structures.Identity) *telego.ReplyKeyboardMarkup {
-	var cathedras = bd.GetCathedras(bot, msg, identity)
+func CreateKeyboardCathedra(bd database.IBd, bot *telego.Bot, chatID int64, identity *structures.Identity) *telego.ReplyKeyboardMarkup {
+	var cathedras = bd.GetCathedras(bot, chatID, identity)
 	var items_rows [][]telego.KeyboardButton = utils.GetItemsRow(cathedras)
 	return tu.Keyboard(
 		items_rows...,

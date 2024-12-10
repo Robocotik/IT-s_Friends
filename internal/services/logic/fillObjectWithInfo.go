@@ -17,7 +17,7 @@ func FillObjectWithInfo(state *structures.State, bd database.IBd, bot *telego.Bo
 	var err error
 	switch *state {
 	case structures.StateAskFilial:
-		filials := bd.GetFilials(bot, msg)
+		filials := bd.GetFilials(bot, msg.Chat.ID)
 		identity.Filial, err = input.ParseString(bot, msg, errors.New("филиал"), filials)
 		if err != nil {
 			handle.HandleSelectFilial(bd, bot, msg)
@@ -27,7 +27,7 @@ func FillObjectWithInfo(state *structures.State, bd database.IBd, bot *telego.Bo
 		*state = structures.StateAskFaculty
 
 	case structures.StateAskFaculty:
-		faculties := bd.GetFaculties(bot, msg, identity)
+		faculties := bd.GetFaculties(bot, msg.Chat.ID, identity)
 		identity.Faculty, err = input.ParseString(bot, msg, errors.New("факультет"), faculties)
 		if err != nil {
 			handle.HandleSelectFaculty(bd, bot, msg, identity)
@@ -37,7 +37,7 @@ func FillObjectWithInfo(state *structures.State, bd database.IBd, bot *telego.Bo
 		*state = structures.StateAskCathedra
 
 	case structures.StateAskCathedra:
-		cathedras := bd.GetCathedras(bot, msg, identity)
+		cathedras := bd.GetCathedras(bot, msg.Chat.ID, identity)
 		identity.Cathedra, err = input.ParseString(bot, msg, errors.New("кафедра"), cathedras)
 		if err != nil {
 			handle.HandleSelectCathedra(bd, bot, msg, identity)
@@ -47,7 +47,7 @@ func FillObjectWithInfo(state *structures.State, bd database.IBd, bot *telego.Bo
 		handle.HandleSelectCourse(bd, bot, msg, identity)
 
 	case structures.StateAskCourse:
-		courses := bd.GetCourses(bot, msg, identity)
+		courses := bd.GetCourses(bot, msg.Chat.ID, identity)
 		identity.Course, err = input.ParseString(bot, msg, errors.New("курс"), courses)
 		if err != nil {
 			handle.HandleSelectCourse(bd, bot, msg, identity)
@@ -57,7 +57,7 @@ func FillObjectWithInfo(state *structures.State, bd database.IBd, bot *telego.Bo
 		*state = structures.StateAskGroup
 
 	case structures.StateAskGroup:
-		var groups = bd.GetGroups(bot, msg, identity)
+		var groups = bd.GetGroups(bot, msg.Chat.ID, identity)
 		identity.Group, err = input.ParseString(bot, msg, errors.New("группа"), groups)
 		if err != nil {
 			handle.HandleSelectGroup(bd, bot, msg, identity)
@@ -73,8 +73,8 @@ func FillObjectWithInfo(state *structures.State, bd database.IBd, bot *telego.Bo
 			break
 		}
 		if msg.Text == consts.YES {
-			handle.HandleThankForData(bot, msg)
-			identity.Uuid = bd.GetGroupByUID(bot, msg, identity)
+			handle.HandleThankForData(bot, msg.Chat.ID)
+			identity.Uuid = bd.GetGroupByUID(bot, msg.Chat.ID, identity)
 			*state = structures.StateSearch
 
 		} else {
@@ -83,7 +83,7 @@ func FillObjectWithInfo(state *structures.State, bd database.IBd, bot *telego.Bo
 		}
 
 	default:
-		output.WriteMessage(bot, msg, "Неизвестная команда")
+		output.WriteMessage(bot, msg.Chat.ID, "Неизвестная команда")
 		panic("unknown state")
 	}
 

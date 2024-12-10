@@ -9,10 +9,10 @@ import (
 	"github.com/mymmrac/telego"
 )
 
-func UpdateBd(ctx context.Context, conn *pgx.Conn, bot *telego.Bot, msg telego.Message) error {
+func UpdateBd(ctx context.Context, conn *pgx.Conn, bot *telego.Bot, chatID int64) error {
 	ctxx, cancel := context.WithTimeout(ctx, 20*time.Second)
 	defer cancel()
-	err := ParseAllSchdule(ctxx, conn, bot, msg)
+	err := ParseAllSchdule(ctxx, conn, bot, chatID)
 
 	for {
 		select {

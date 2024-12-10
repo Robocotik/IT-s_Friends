@@ -11,7 +11,7 @@ import (
 	"github.com/mymmrac/telego"
 )
 
-func (psql Postgres) GetGroupByUID(bot *telego.Bot, msg telego.Message, identity *structures.Identity) string {
+func (psql Postgres) GetGroupByUID(bot *telego.Bot, chatID int64, identity *structures.Identity) string {
 	var res string
 
 	// Исправлено: добавлена корректная SQL команда
@@ -28,7 +28,7 @@ func (psql Postgres) GetGroupByUID(bot *telego.Bot, msg telego.Message, identity
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "QueryRow failed in getting group uid: %v\n", err)
-		output.RiseError(bot, msg, err)
+		output.RiseError(bot, chatID, err)
 		return ""
 	}
 	fmt.Println("UUID: ", res)

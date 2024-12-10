@@ -5,9 +5,9 @@ import (
 	tu "github.com/mymmrac/telego/telegoutil"
 )
 
-func WriteMessage(bot *telego.Bot, msg telego.Message, text string) {
+func WriteMessage(bot *telego.Bot, chatId int64, text string) {
 	_, _ = bot.SendMessage(tu.Message(
-		msg.Chat.ChatID(),
+		telego.ChatID{ID: chatId},
 		text,
 	))
 	bot.GetMe()

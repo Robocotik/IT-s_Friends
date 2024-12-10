@@ -8,10 +8,10 @@ import (
 	tu "github.com/mymmrac/telego/telegoutil"
 )
 
-func HandleThankForData(bot *telego.Bot, msg telego.Message) {
+func HandleThankForData(bot *telego.Bot, chatID int64) {
 	keyboard := keyboard.CreateKeyboardThankForData()
 	_, _ = bot.SendMessage(tu.Message(
-		msg.Chat.ChatID(),
+		telego.ChatID{ID: chatID},
 		fmt.Sprintf("Спасибо за информацию!"),
 	).WithReplyMarkup(keyboard))
 }

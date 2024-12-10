@@ -67,7 +67,7 @@ func main() {
 				Exists: false,
 			}
 			sessions[userID] = user
-			psql.AddUserId(bot, msg, msg.Chat.ChatID().ID, msg.From.Username)
+			psql.AddUserId(bot, msg.Chat.ChatID().ID, msg.Chat.ChatID().ID, msg.From.Username)
 		}
 		sessionsMutex.Unlock()
 

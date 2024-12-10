@@ -11,7 +11,7 @@ import (
 	"github.com/mymmrac/telego"
 )
 
-func (psql Postgres) GetGroups(bot *telego.Bot, msg telego.Message, identity *structures.Identity) []string {
+func (psql Postgres) GetGroups(bot *telego.Bot, chatID int64, identity *structures.Identity) []string {
 
 	var res []string
 	var groupsTitle string
@@ -28,7 +28,7 @@ func (psql Postgres) GetGroups(bot *telego.Bot, msg telego.Message, identity *st
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Query failed in getting groups: %v\n", err)
-		output.RiseError(bot, msg, err)
+		output.RiseError(bot, chatID, err)
 		return []string{""}
 	}
 	defer rows.Close()
@@ -37,7 +37,7 @@ func (psql Postgres) GetGroups(bot *telego.Bot, msg telego.Message, identity *st
 		err := rows.Scan(&groupsTitle)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to scan group title: %v\n", err)
-			output.RiseError(bot, msg, err)
+			output.RiseError(bot, chatID, err)
 			return []string{""}
 		}
 		res = append(res, groupsTitle)
@@ -45,7 +45,7 @@ func (psql Postgres) GetGroups(bot *telego.Bot, msg telego.Message, identity *st
 
 	if err := rows.Err(); err != nil {
 		fmt.Fprintf(os.Stderr, "Error occurred during row iteration: %v\n", err)
-		output.RiseError(bot, msg, err)
+		output.RiseError(bot, chatID, err)
 		return []string{""}
 	}
 	return res

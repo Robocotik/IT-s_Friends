@@ -14,7 +14,7 @@ import (
 	"github.com/mymmrac/telego"
 )
 
-func ParseAllSchdule(ctx context.Context, conn *pgx.Conn, bot *telego.Bot, msg telego.Message) error {
+func ParseAllSchdule(ctx context.Context, conn *pgx.Conn, bot *telego.Bot, chatID int64) error {
 	resp, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://lks.bmstu.ru/lks-back/api/v1/structure", nil)
 	var group_id, cathedra_id, faculty_id, fillial_id, course_id int64
 
@@ -42,7 +42,7 @@ func ParseAllSchdule(ctx context.Context, conn *pgx.Conn, bot *telego.Bot, msg t
     `,
 			filial.Abbr).Scan(&fillial_id)
 		if err != nil {
-			output.RiseError(bot, msg, err)
+			output.RiseError(bot, chatID, err)
 		}
 
 		for _, faculty := range filial.Children {
@@ -57,7 +57,7 @@ func ParseAllSchdule(ctx context.Context, conn *pgx.Conn, bot *telego.Bot, msg t
     `,
 				faculty.Abbr).Scan(&faculty_id)
 			if err != nil {
-				output.RiseError(bot, msg, err)
+				output.RiseError(bot, chatID, err)
 			}
 			for _, cathedra := range faculty.Children {
 				err := conn.QueryRow(context.Background(),
@@ -71,7 +71,7 @@ func ParseAllSchdule(ctx context.Context, conn *pgx.Conn, bot *telego.Bot, msg t
     `,
 					cathedra.Abbr).Scan(&cathedra_id)
 				if err != nil {
-					output.RiseError(bot, msg, err)
+					output.RiseError(bot, chatID, err)
 				}
 				for _, course := range cathedra.Children {
 					err := conn.QueryRow(context.Background(),
@@ -85,7 +85,7 @@ func ParseAllSchdule(ctx context.Context, conn *pgx.Conn, bot *telego.Bot, msg t
     `,
 						course.Abbr).Scan(&course_id)
 					if err != nil {
-						output.RiseError(bot, msg, err)
+						output.RiseError(bot, chatID, err)
 					}
 					for _, group := range course.Children {
 						err := conn.QueryRow(context.Background(),
@@ -99,14 +99,14 @@ func ParseAllSchdule(ctx context.Context, conn *pgx.Conn, bot *telego.Bot, msg t
     `,
 							group.Abbr).Scan(&group_id)
 						if err != nil {
-							output.RiseError(bot, msg, err)
+							output.RiseError(bot, chatID, err)
 						}
 						_, err = conn.Exec(context.Background(),
 							"INSERT INTO schedule (uuid, course_id, fillial_id, faculty_id, cathedra_id, group_id) VALUES($1, $2, $3, $4, $5, $6) on conflict (uuid) do nothing",
 							group.Uuid, course_id, fillial_id, faculty_id, cathedra_id, group_id)
 						if err != nil {
 							fmt.Fprintf(os.Stderr, "Query failed: %v\n", err)
-							output.RiseError(bot, msg, err)
+							output.RiseError(bot, chatID, err)
 							return err
 						}
 

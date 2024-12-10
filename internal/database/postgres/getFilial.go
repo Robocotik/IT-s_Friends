@@ -9,7 +9,7 @@ import (
 	"github.com/mymmrac/telego"
 )
 
-func (psql Postgres) GetFilials(bot *telego.Bot, msg telego.Message) []string {
+func (psql Postgres) GetFilials(bot *telego.Bot, chatID int64) []string {
 	var res []string
 	var filialTitle string
 
@@ -19,7 +19,7 @@ func (psql Postgres) GetFilials(bot *telego.Bot, msg telego.Message) []string {
 	)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Query failed in getting filials: %v\n", err)
-		output.RiseError(bot, msg, err)
+		output.RiseError(bot, chatID, err)
 		return []string{""}
 	}
 	defer rows.Close()
@@ -28,7 +28,7 @@ func (psql Postgres) GetFilials(bot *telego.Bot, msg telego.Message) []string {
 		err := rows.Scan(&filialTitle)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to scan filial title: %v\n", err)
-			output.RiseError(bot, msg, err)
+			output.RiseError(bot, chatID, err)
 			return []string{""}
 		}
 		res = append(res, filialTitle)
@@ -36,7 +36,7 @@ func (psql Postgres) GetFilials(bot *telego.Bot, msg telego.Message) []string {
 
 	if err := rows.Err(); err != nil {
 		fmt.Fprintf(os.Stderr, "Error occurred during row iteration: %v\n", err)
-		output.RiseError(bot, msg, err)
+		output.RiseError(bot, chatID, err)
 		return []string{""}
 	}
 	fmt.Println(res)

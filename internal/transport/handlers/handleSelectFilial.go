@@ -11,7 +11,7 @@ import (
 )
 
 func HandleSelectFilial(bd database.IBd, bot *telego.Bot, msg telego.Message) {
-	keyboard := keyboard.CreateKeyboardFilial(bd, bot, msg)
+	keyboard := keyboard.CreateKeyboardFilial(bd, bot, msg.Chat.ID)
 	_, _ = bot.SendMessage(tu.Message(
 		msg.Chat.ChatID(),
 		fmt.Sprintf("Выберите филиал"),

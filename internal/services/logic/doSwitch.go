@@ -49,7 +49,7 @@ func DoSwitch(ctx context.Context, bd database.IBd, user *structures.User, frien
 			handle.HandleMenuStart(bot, msg)
 			user.State = structures.StateStartMenu
 			user.Exists = true
-			bd.UpdateUser(bot, msg, user.Identity, msg.Chat.ID)
+			bd.UpdateUser(bot, msg.Chat.ID, user.Identity, msg.Chat.ID)
 		}
 	case structures.StateStartMenu:
 		_, err = input.ParseString(bot, msg, errors.New("ответ"), []string{consts.FIND_NEW_FRIENDS, consts.SHOW_FRIENDS, consts.SET_NOTIFICATIONS})
@@ -68,7 +68,7 @@ func DoSwitch(ctx context.Context, bd database.IBd, user *structures.User, frien
 
 		default:
 			favs, err := bd.GetFriendsFromId(msg.Chat.ChatID().ID)
-			output.RiseError(bot, msg, err)
+			output.RiseError(bot, msg.Chat.ID, err)
 			utils.FuncWithKeyboard(bot, msg, func() (string, error) {
 				return output.ShowFavs(favs)
 			}, keyboard.CreateKeyboardReturnToSearch())
@@ -77,7 +77,7 @@ func DoSwitch(ctx context.Context, bd database.IBd, user *structures.User, frien
 
 	case structures.StateSetNotifications:
 		val, err2 := input.ParseString(bot, msg, errors.New("вариант"), []string{consts.CUSTOM_TIME, consts.H1_BEFORE, consts.H2_BEFORE, consts.H3_BEFORE})
-		output.RiseError(bot, msg, err2)
+		output.RiseError(bot, msg.Chat.ID, err2)
 		if err2 != nil {
 			handle.HandleSetNotifications(bot, msg)
 			break
@@ -95,7 +95,7 @@ func DoSwitch(ctx context.Context, bd database.IBd, user *structures.User, frien
 	case structures.StateSetCustomNotification:
 		user.NotifyPeriod, err = input.CheckPeriod(msg.Text)
 		if err != nil {
-			output.WriteMessage(bot, msg, "Неверный формат данных")
+			output.WriteMessage(bot, msg.Chat.ID, "Неверный формат данных")
 			handle.HandleSetCustomNotification(bot, msg)
 		}
 		// add server notification
@@ -108,7 +108,7 @@ func DoSwitch(ctx context.Context, bd database.IBd, user *structures.User, frien
 		}
 
 	case structures.StateSearch:
-		friend.Identity.Uuid = bd.GetGroupByUID(bot, msg, &friend.Identity)
+		friend.Identity.Uuid = bd.GetGroupByUID(bot, msg.Chat.ID, &friend.Identity)
 		friend.Request = DoRequest(bot, msg, friend.Identity.Uuid)
 		if len(friend.Request.Data.Schedule) != 0 { // проверка на наличие расписания
 			handle.HandleGroupFound(bot, msg)
@@ -137,19 +137,19 @@ func DoSwitch(ctx context.Context, bd database.IBd, user *structures.User, frien
 		friend_id, err := bd.AddFriend(bot, msg, friend)
 		if err != nil {
 			if err.Error() == errorsCustom.ErrTooLongMessage_23514 {
-				output.WriteMessage(bot, msg, errorsCustom.ErrTooLongMessage_23514)
+				output.WriteMessage(bot, msg.Chat.ID, errorsCustom.ErrTooLongMessage_23514)
 				handle.HandleSelectNickname(bot, msg)
 				break
 			}
 		} else {
-			bd.AddConnection(ctx, bot, msg, msg.Chat.ChatID().ID, friend_id)
+			bd.AddConnection(ctx, bot, msg.Chat.ID, msg.Chat.ChatID().ID, friend_id)
 			handle.HandleAddToHavourite(bot, msg)
 		}
 		user.State = structures.StateRedirectToStartSearch
 
 	case structures.StateShowTimetable: // Вывод расписания
 		ch_zn_selected, err := input.ParseContainString(bot, msg, []string{consts.Ch, consts.Zn})
-		output.RiseError(bot, msg, err)
+		output.RiseError(bot, msg.Chat.ID, err)
 		keyboard := keyboard.CreateKeyboardShowTimetable()
 		output.ShowTimetable(bot, msg, keyboard, friend.Request, ch_zn_selected)
 		user.State = structures.StateRedirectToStartSearch
@@ -159,7 +159,7 @@ func DoSwitch(ctx context.Context, bd database.IBd, user *structures.User, frien
 		user.State = structures.StateStartMenu
 
 	default:
-		output.WriteMessage(bot, msg, "Неизвестная команда")
+		output.WriteMessage(bot, msg.Chat.ID, "Неизвестная команда")
 		panic("unknown state")
 	}
 }

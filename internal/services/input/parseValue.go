@@ -16,7 +16,7 @@ func ParseString(bot *telego.Bot, msg telego.Message, err error, possibleData []
 		}
 	}
 	if !found {
-		output.RiseError(bot, msg, err)
+		output.RiseError(bot, msg.Chat.ID, err)
 		return "", errors.New("unknown message")
 	}
 	return msg.Text, nil

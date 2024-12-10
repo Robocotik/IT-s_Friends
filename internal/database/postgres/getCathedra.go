@@ -13,7 +13,7 @@ import (
 	"github.com/mymmrac/telego"
 )
 
-func (psql Postgres) GetCathedras(bot *telego.Bot, msg telego.Message, identity *structures.Identity) []string {
+func (psql Postgres) GetCathedras(bot *telego.Bot, chatID int64, identity *structures.Identity) []string {
 
 	var res []string
 	var cathedraTitle string
@@ -28,7 +28,7 @@ func (psql Postgres) GetCathedras(bot *telego.Bot, msg telego.Message, identity 
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Query failed in getting cathedras: %v\n", err)
-		output.RiseError(bot, msg, err)
+		output.RiseError(bot, chatID, err)
 		return []string{""}
 	}
 	defer rows.Close()
@@ -37,7 +37,7 @@ func (psql Postgres) GetCathedras(bot *telego.Bot, msg telego.Message, identity 
 		err := rows.Scan(&cathedraTitle)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to scan cathedra title: %v\n", err)
-			output.RiseError(bot, msg, err)
+			output.RiseError(bot, chatID, err)
 			return []string{""}
 		}
 		res = append(res, cathedraTitle)
@@ -45,7 +45,7 @@ func (psql Postgres) GetCathedras(bot *telego.Bot, msg telego.Message, identity 
 
 	if err := rows.Err(); err != nil {
 		fmt.Fprintf(os.Stderr, "Error occurred during row iteration: %v\n", err)
-		output.RiseError(bot, msg, err)
+		output.RiseError(bot, chatID, err)
 		return []string{""}
 	}
 
