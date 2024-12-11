@@ -3,6 +3,7 @@ package structures
 import (
 	"time"
 
+	// "github.com/Robocotik/IT-s_Friends/internal/services/output"
 	"github.com/go-co-op/gocron"
 )
 
@@ -21,6 +22,10 @@ func (nu NotifyUser) NotifyCustom() {
 }
 func (nu NotifyUser) NotifyNoCustom() {
 
+}
+
+func (nu NotifyUser) WriteMessage() {
+	// output.WriteMessage()
 }
 
 func (nu NotifyUser) Notify() {

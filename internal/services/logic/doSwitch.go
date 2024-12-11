@@ -11,6 +11,8 @@ import (
 	"github.com/Robocotik/IT-s_Friends/internal/models/structures"
 	"github.com/Robocotik/IT-s_Friends/internal/services/input"
 	"github.com/Robocotik/IT-s_Friends/internal/services/output"
+	output_friends "github.com/Robocotik/IT-s_Friends/internal/services/output/friends"
+	output_schedule "github.com/Robocotik/IT-s_Friends/internal/services/output/schedule"
 	"github.com/Robocotik/IT-s_Friends/internal/services/utils"
 	handle "github.com/Robocotik/IT-s_Friends/internal/transport/handlers"
 	"github.com/mymmrac/telego"
@@ -22,7 +24,6 @@ func DoSwitch(ctx context.Context, bd database.IBd, user *structures.User, frien
 	var err error
 	switch user.State {
 	case structures.StateStart:
-
 		handle.HandleStart(bot, msg)
 		user.State = structures.StateDefault
 
@@ -70,7 +71,7 @@ func DoSwitch(ctx context.Context, bd database.IBd, user *structures.User, frien
 			favs, err := bd.GetFriendsFromId(msg.Chat.ChatID().ID)
 			output.RiseError(bot, msg.Chat.ID, err)
 			utils.FuncWithKeyboard(bot, msg, func() (string, error) {
-				return output.ShowFavs(favs)
+				return output_friends.ShowFavs(favs)
 			}, keyboard.CreateKeyboardReturnToSearch())
 			user.State = structures.StateRedirectToStartSearch
 		}
@@ -151,7 +152,7 @@ func DoSwitch(ctx context.Context, bd database.IBd, user *structures.User, frien
 		ch_zn_selected, err := input.ParseContainString(bot, msg, []string{consts.Ch, consts.Zn})
 		output.RiseError(bot, msg.Chat.ID, err)
 		keyboard := keyboard.CreateKeyboardShowTimetable()
-		output.ShowTimetable(bot, msg, keyboard, friend.Request, ch_zn_selected)
+		output_schedule.ShowTimetable(bot, msg, keyboard, friend.Request, ch_zn_selected)
 		user.State = structures.StateRedirectToStartSearch
 
 	case structures.StateRedirectToStartSearch:

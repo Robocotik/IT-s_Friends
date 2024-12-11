@@ -18,6 +18,7 @@ func ShowLesson(msg telego.Message, lesson entities.IDay, isCh bool) []tu.Messag
 		for _, audience := range lesson.Audiences {
 			dataToShowCabinet += audience.Name + ", "
 		}
+		dataToShowCabinet = dataToShowCabinet[:len(dataToShowCabinet)-2]
 	}
 	if dataToShowCabinet == "" {
 		dataToShowCabinet = "Кабинет не указан"
@@ -25,14 +26,14 @@ func ShowLesson(msg telego.Message, lesson entities.IDay, isCh bool) []tu.Messag
 	if (isCh && lesson.Week != "zn") || (!isCh && lesson.Week != "ch") {
 		dataToShow = "📅 " + strconv.Itoa(lesson.Time) + " пара ( " + lesson.StartTime + " - " + lesson.EndTime + " )\n"
 		dataToShowBold = "🎓 " + (lesson.Discipline.FullName) + "\n"
-		dataToShowCabinet = "🚪 " + dataToShowCabinet[:len(dataToShowCabinet)-2] + "\n\n"
+		dataToShowCabinet = "🚪 " + dataToShowCabinet + "\n\n"
 	}
 	if dataToShowBold == "-1" {
 		return nil
 	}
 
 	res := []tu.MessageEntityCollection{
-		
+
 		tu.Entity(dataToShow),
 		tu.Entity(dataToShowBold).Bold(),
 		tu.Entity(dataToShowCabinet),
