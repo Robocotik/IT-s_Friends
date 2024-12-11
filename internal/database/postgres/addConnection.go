@@ -14,7 +14,7 @@ import (
 
 
 func (psql Postgres) AddConnection(ctx context.Context, bot *telego.Bot, chatID int64, user_id int64, friend_id int64) error {
-	fmt.Printf("\n Я ДОБАВИЛ %s в %s : \n", user_id, friend_id)
+	// fmt.Printf("\n Я ДОБАВИЛ %s в %s : \n", user_id, friend_id)
 	_, err := psql.Conn.Exec(
 		ctx,
 		"INSERT INTO user_friend (user_id, friend_id) VALUES ($1, $2)",

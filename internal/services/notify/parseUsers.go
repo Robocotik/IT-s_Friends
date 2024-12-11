@@ -5,7 +5,6 @@ import (
 	// "Friends/src/utils"
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/mymmrac/telego"
@@ -13,7 +12,7 @@ import (
 
 func ParseUsers(conn *pgx.Conn, bot *telego.Bot, msg_id int64) []structures.NotifyUser {
 	var result []structures.NotifyUser
-	rows, err := conn.Query(context.Background(), "SELECT id, notify_interval FROM users")
+	rows, err := conn.Query(context.Background(), "SELECT id, notify_interval, nickname FROM users")
 	if err != nil {
 		// utils.RiseError(bot, msg_id, err)
 		fmt.Println(err)
@@ -21,17 +20,17 @@ func ParseUsers(conn *pgx.Conn, bot *telego.Bot, msg_id int64) []structures.Noti
 	defer rows.Close()
 
 	for rows.Next() {
-		var frequence time.Duration
+		var frequence, nickname string 
 		var id int64
-		err = rows.Scan(&id, &frequence)
-		fmt.Sprintf("ID: "+string(id)+"   Frequency: "+frequence.String() + "\n")
+		err = rows.Scan(&id, &frequence, &nickname)
+		fmt.Sprintf("ID: "+string(id)+"   Frequency: "+frequence + "\n")
 		// utils.WriteMessage(bot, msg, "ID: "+string(id)+"   Frequency: "+frequence.String() + "\n")
 		if err != nil {
 			fmt.Println(err)
 			break
 		}
-		result = append(result, structures.NotifyUser{id, frequence})
-		fmt.Println("ПОЛЬЗОВАТЕЛЬ,%s ВРЕМЯ %s", id, frequence)
+		result = append(result, structures.NotifyUser{id, frequence, nickname})
+		fmt.Println("ПОЛЬЗОВАТЕЛЬ,%s ВРЕМЯ %s, NICKNAME %s", id, frequence, nickname)
 	}
 	return result
 }
