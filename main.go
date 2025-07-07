@@ -7,7 +7,8 @@ import (
 	"os"
 	"sync"
 	"time"
-
+	
+	"github.com/Robocotik/IT-s_Friends/cmd"
 	"github.com/Robocotik/IT-s_Friends/internal/database"
 	"github.com/Robocotik/IT-s_Friends/internal/database/postgres"
 	"github.com/Robocotik/IT-s_Friends/internal/models/structures"
@@ -19,7 +20,7 @@ import (
 )
 
 func initEnv() {
-	err := godotenv.Load("../configs/.env")
+	err := godotenv.Load("./.env")
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
@@ -27,7 +28,7 @@ func initEnv() {
 
 func main() {
 	initEnv()
-
+	cmd.Execute()
 	sessions := make(map[int64]*structures.User)
 	var sessionsMutex sync.Mutex
 	botToken := os.Getenv("TOKEN")
@@ -48,8 +49,10 @@ func main() {
 	psql.Conn, err = database.NewDatabase("POSTGRES_DRIVER", "POSTGRES_USER", "POSTGRES_PASSWORD", "POSTGRES_HOST", "POSTGRES_PORT", "POSTGRES_TABLE")
 	defer psql.Conn.Close(context.Background())
 	psql.InitSessions(&sessions)
+	// database.UpdateBd(ctxMain, psql.Conn, bot, botUser.ID)
 	bh, _ := th.NewBotHandler(bot, updates)
 	go notify.CronMain(psql.Conn, bot, botUser.ID)
+
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
