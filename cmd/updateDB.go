@@ -13,7 +13,7 @@ import (
 // updateDBCmd represents the updateDB command
 var updateDBCmd = &cobra.Command{
 	Use:   "updateDB",
-	Short: "A brief description of your command",
+	Short: "use to start application",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 
